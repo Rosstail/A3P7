@@ -5,9 +5,10 @@ import java.sql.*;
 
 public class LogToSQL extends JFrame {
 
-    Menu menu = new Menu();
+    //Menu menu = new Menu();
+    //Display display = new Display();
 
-    public void logIn(JFrame window, JTextField userJTF, JPasswordField passWordJTF) {
+    public void logIn(JTextField userJTF, JPasswordField passWordJTF) {
         String user = userJTF.getText();
         String pass = passWordJTF.getText();
 
@@ -22,10 +23,12 @@ public class LogToSQL extends JFrame {
                 int userID = results.getInt("user_id");
                 String userRole = results.getString("user_role");
                 System.out.println("Connexion succeed ! ID = " + userID + " ROLE = " + userRole);
-                menu.menu(window, userID, connection, userRole);
+                //display.displayMainCrudMenu(userID, connection, userRole);
             }
-            else
+            else {
                 System.out.println("Connexion failed.");
+                connection.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
