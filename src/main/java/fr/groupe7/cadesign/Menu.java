@@ -15,8 +15,8 @@ public class Menu {
      * Ajoute les actions disponibles selon le rôle de l'utilisateur
      * @param role
      */
-    public void setMenuPermissions(String role) {
-        /*display.setDefaultPerms();
+    /*public void setMenuPermissions(String role) {
+        display.setDefaultPerms();
         switch (role) {
             case "customer":
                 display.setCustPerms();
@@ -30,7 +30,7 @@ public class Menu {
                 display.setArchPerms();
                 display.setAdminPerms();
                 break;
-        }*/
+        }
         System.out.println("TEST 2");
-    }
+    }*/
 }

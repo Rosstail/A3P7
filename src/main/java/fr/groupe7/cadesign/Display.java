@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Display implements ActionListener {
@@ -49,6 +50,9 @@ public class Display implements ActionListener {
     CheckIni checkIni = new CheckIni();
     Actions actions = new Actions();
     Menu menu = new Menu();
+    String[] userIdRole = new String[] {"a","b"};
+    int userID;
+    String userRole;
 
     public void setWindow() {
         window.setTitle("CA DESIGN - HOME");
@@ -122,8 +126,9 @@ public class Display implements ActionListener {
      * Créer le menu principal CRUD selon le rôle de l'utilisateur
      * @param role
      */
-    public void displayMainCrudMenu(int userID, Connection connection, String role ){
-        window.setTitle("CA DESIGN - Welcome " + role + "!");
+    public void displayMainCrudMenu(int userID, String role ){
+        setCrudperms();
+        window.setTitle("CA DESIGN - Welcome " + role + " " + userID + "!");
         window.getContentPane().removeAll();
         window.revalidate();
         window.repaint();
@@ -134,7 +139,12 @@ public class Display implements ActionListener {
         crudBar.add(crudMenu);
         l1.add(crudBar);
         l3.add(disconnect);
-        menu.setMenuPermissions(role);
+        c1.add(l1);
+        c1.add(l2);
+        c1.add(l3);
+        crudPanel.add(c1);
+        window.getContentPane().add(crudPanel);
+        window.setVisible(true);
 
         users.addActionListener(new ActionListener() {
             @Override
@@ -151,13 +161,15 @@ public class Display implements ActionListener {
         account.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("TEST 1");
+                System.out.println("TEST UPDATE PROFILE");
             }
         });
         disconnect.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
+                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
+                            "anthony", "Atelier2");
                     connection.close();
                     System.out.println("Successfully disconnected.");
                     window.removeAll();
@@ -168,12 +180,21 @@ public class Display implements ActionListener {
                 }
             }
         });
-        c1.add(l1);
-        c1.add(l2);
-        c1.add(l3);
-        crudPanel.add(c1);
-        window.getContentPane().add(crudPanel);
-        window.setVisible(true);
+    }
+
+    public void setCrudperms() {
+        setDefaultPerms();
+        switch (userRole) {
+            case "customer":
+                setCustPerms();
+                break;
+            case "architect":
+                setArchPerms();
+                break;
+            case "admin":
+                setAdminPerms();
+                break;
+        }
     }
 
     public void setDefaultPerms() {
@@ -201,7 +222,12 @@ public class Display implements ActionListener {
             displayUserRegistration();
         else if (actionEvent.getSource() == signUp)
             actions.checkRegister(firstName, lastName, userMail, passWord);
-        else if (actionEvent.getSource() == logIn)
-            actions.checkLogIn(userMail, passWord);
+        else if (actionEvent.getSource() == logIn) {
+            userIdRole = actions.checkLogIn(userMail, passWord);
+            userID = Integer.parseInt(userIdRole[0]);
+            userRole = userIdRole[1];
+            displayMainCrudMenu(userID, userRole);
+        }
+
     }
 }

@@ -12,7 +12,7 @@ import java.sql.*;
 
 public class UpdateProfile {
 
-    /*JLabel actualMailLabel = new JLabel("Change mail adress");
+    JLabel actualMailLabel = new JLabel("Change mail adress");
     JLabel confirmPassLabel = new JLabel("Actual password *");
     JLabel newPassLabel = new JLabel("New password");
     JTextField newMail = new JTextField(15);
@@ -20,10 +20,10 @@ public class UpdateProfile {
     JTextField newPass = new JTextField(15);
     JButton confirm = new JButton("Confirm");
     int id;
-    Connection co;*/
+    Connection co;
 
-    public void userMenu(/*JFrame window, int user_id, Connection connection*/) {
-        /*id = user_id;
+    public void userMenu(JFrame window, int user_id, Connection connection) {
+        id = user_id;
         co = connection;
         window.getContentPane().removeAll();
         window.add(actualMailLabel);
@@ -41,11 +41,11 @@ public class UpdateProfile {
                 if (getPass(id, co).equals(confirmPass.getText()))
                     changes();
             }
-        });*/
+        });
         System.out.println("TEST3");
     }
 
-    /*private String getPass(int id, Connection co) {
+    private String getPass(int id, Connection co) {
         String strUserPass = "SELECT user_password FROM users WHERE '" + id +
                 "' = user_id";
         try {
@@ -129,6 +129,6 @@ public class UpdateProfile {
             return nbInt >= 3 && nbLowCase >= 3 && nbUpCase >= 2 && nbSpecial >= 2;
         }
         return false;
-    }*/
+    }
 
 }

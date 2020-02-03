@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 
 /**
  * Création de la fenêtre et interface d'accueil (login / register)
@@ -12,9 +13,10 @@ public class Actions {
     RegisterToSQL registerToSQL = new RegisterToSQL();
     LogToSQL logToSQL = new LogToSQL();
 
-    public void checkLogIn(JTextField userMail, JPasswordField passWord) {
+    public String[] checkLogIn(JTextField userMail, JPasswordField passWord) {
         if (userMail.getText().length() > 0 && passWord.getPassword().length > 0 )
-            logToSQL.logIn(userMail, passWord);
+            return logToSQL.logIn(userMail, passWord);
+        return null;
     }
 
     public void checkRegister(JTextField firstName, JTextField lastName, JTextField userMail, JPasswordField passWord) {
