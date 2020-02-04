@@ -14,65 +14,40 @@ public class Display implements ActionListener {
     private JMenuBar cho = new JMenuBar();
     private JMenuItem connexion = new JMenuItem("Se connecter");
     private JMenuItem registration = new JMenuItem("S'inscrire");
-    private JLabel firstNameLabel = new JLabel("Prénom");
-    private JLabel lastNameLabel = new JLabel("Nom");
-    private JLabel mailLabel = new JLabel("E-Mail");
-    private JLabel passLabel = new JLabel("Password");
     private JButton logIn = new JButton("Connexion");
     private JButton signUp = new JButton("Inscription");
-    private JPanel registerPanel = new JPanel();
-    private JPanel connexionPanel = new JPanel();
-    private JPanel logInPanel = new JPanel();
+    private JPanel panel = new JPanel();
 
-    Box l1 = Box.createHorizontalBox();
-    Box l2 = Box.createHorizontalBox();
-    Box l3 = Box.createHorizontalBox();
-    Box l4 = Box.createHorizontalBox();
-    Box c1 = Box.createVerticalBox();
-    JPanel crudPanel = new JPanel();
-    JMenu crudMenu = new JMenu("CRUD MENU");
-    JMenuBar crudBar = new JMenuBar();
-    JMenu createMenu = new JMenu("Create");
-    JMenu readMenu = new JMenu("Read");
-    JMenu updateMenu = new JMenu("Update");
-    JMenu deleteMenu = new JMenu("Delete");
-    JMenuItem projects = new JMenuItem("Projects");
-    JMenuItem account = new JMenuItem("Account");
-    JMenuItem users = new JMenuItem("Users");
-    JButton disconnect = new JButton("Disconnect");
-    UpdateProfile updateProfile = new UpdateProfile();
+    private Box l1 = Box.createHorizontalBox();
+    private Box l2 = Box.createHorizontalBox();
+    private Box l3 = Box.createHorizontalBox();
+    private Box l4 = Box.createHorizontalBox();
+    private Box l5 = Box.createHorizontalBox();
+    private Box c1 = Box.createVerticalBox();
+    private JButton disconnect = new JButton("Disconnect");
+    private UpdateProfile updateProfile = new UpdateProfile();
+    private JTextField userMail = new JTextField(10);
+    private JPasswordField passWord = new JPasswordField(10);
 
-    JTextField firstName = new JTextField(10);
-    JTextField lastName = new JTextField(10);
-    JTextField userMail = new JTextField(10);
-    JPasswordField passWord = new JPasswordField(10);
-    JCheckBox checkbox = new JCheckBox("Retenir mes informations");
-    CheckIni checkIni = new CheckIni();
-    LogRegActions logRegActions = new LogRegActions();
-    String[] userIdNameRole = new String[] {"a", "b", "c"};
-    int userID;
-    String userFirstName;
-    String userLastName;
-    String userRole;
-    Connection connection;
+    private Connection connection;
 
-    JLabel newMailLabel = new JLabel("Change mail adress");
-    JLabel confirmPassLabel = new JLabel("Actual password *");
-    JLabel newPassLabel = new JLabel("New password");
-    JTextField newMail = new JTextField(15);
-    JTextField confirmPass = new JTextField(15);
-    JTextField newPass = new JTextField(15);
-    JButton confirm = new JButton("Confirm");
-
-    public void setWindow() throws SQLException {
+    /**
+     * Creation of window and connexion.
+     * @throws SQLException
+     */
+    protected void setWindow() throws SQLException {
         connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
                 "anthony", "Atelier2");
+
+        //*** SET GENERALS INFO OF THE WINDOW ***
         window.setTitle("CA DESIGN - HOME");
         window.setSize(1200, 1000);
         window.setLocationRelativeTo(null);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setLayout(new FlowLayout()); //Adapter taille des boutons
-        //Ajouter Connexion/s'enregistrer sur le menu
+        window.setLayout(new FlowLayout());
+        //***************************************
+
+        resetWindow();
         accessMenu.add(connexion);
         accessMenu.add(registration);
         connexion.addActionListener(this);
@@ -82,31 +57,49 @@ public class Display implements ActionListener {
         c1.add(l1);
         window.add(c1);
         checkIni.check(userMail, passWord);
-        window.getContentPane().add(logInPanel);
+        window.getContentPane().add(panel);
         window.setVisible(true);
     }
+
+    private JTextField firstName = new JTextField(10);
+    private JTextField lastName = new JTextField(10);
+    private JCheckBox checkbox = new JCheckBox("Retenir mes informations");
+    private CheckIni checkIni = new CheckIni();
+    private LogRegActions logRegActions = new LogRegActions();
+    private int userID;
+    private String userFirstName;
+    private String userLastName;
+    private String userRole;
 
     /**
      * S'exécute lorsque l'utilisateur choisis de s'inscrire
      */
     private void displayUserRegistration(){
+        resetWindow();
 
-        window.getContentPane().remove(connexionPanel);
-        l2.add(firstNameLabel);
-        l2.add(lastNameLabel);
-        l2.add(mailLabel);
-        l2.add(passLabel);
+        accessMenu.add(connexion);
+        accessMenu.add(registration);
+        connexion.addActionListener(this);
+        registration.addActionListener(this);
+        cho.add(accessMenu);
+        l1.add(cho);
+        l2.add(new JLabel("Prénom"));
+        l2.add(new JLabel("Nom"));
+        l2.add(new JLabel("E-Mail"));
+        l2.add(new JLabel("Password"));
         l3.add(firstName);
         l3.add(lastName);
         l3.add(userMail);
         l3.add(passWord);
         l4.add(signUp);
         signUp.addActionListener(this);
+        c1.add(l1);
         c1.add(l2);
         c1.add(l3);
         c1.add(l4);
-        registerPanel.add(c1);
-        window.add(registerPanel);
+        c1.add(l5);
+        panel.add(c1);
+        window.add(panel);
         window.revalidate();
         window.repaint();
     }
@@ -115,34 +108,51 @@ public class Display implements ActionListener {
      * Modifie la fenêtre pour permettre à l'utilisateur de se connecter
      */
     private void displayUserConnexion(){
-        window.getContentPane().remove(registerPanel);
-        l2.add(mailLabel);
-        l2.add(passLabel);
+        resetWindow();
+
+        accessMenu.add(connexion);
+        accessMenu.add(registration);
+        connexion.addActionListener(this);
+        registration.addActionListener(this);
+        cho.add(accessMenu);
+        l1.add(cho);
+        l2.add(new JLabel("E-Mail"));
+        l2.add(new JLabel("Password"));
         l3.add(userMail);
         l3.add(passWord);
         l3.add(checkbox);
         l4.add(logIn);
+        c1.add(l1);
         c1.add(l2);
         c1.add(l3);
         c1.add(l4);
-        connexionPanel.add(c1);
+        panel.add(c1);
 
         logIn.addActionListener(this);
 
-        window.add(connexionPanel);
+        window.add(panel);
         window.revalidate();
         window.repaint();
     }
+
+    private JMenuBar crudBar = new JMenuBar();
+    private JMenu crudMenu = new JMenu("CRUD MENU");
+    private JMenu createMenu = new JMenu("Create");
+    private JMenu readMenu = new JMenu("Read");
+    private JMenu updateMenu = new JMenu("Update");
+    private JMenu deleteMenu = new JMenu("Delete");
+    private JMenuItem projects = new JMenuItem("Projects");
+    private JMenuItem account = new JMenuItem("Account");
+    private JMenuItem users = new JMenuItem("Users");
 
     /**
      * Créer le menu principal CRUD selon le rôle de l'utilisateur
      */
     private void displayMainCrudMenu(){
+        resetWindow();
         setCrudperms();
+        //general widnow properties
         window.setTitle("CA DESIGN - Welcome [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName + "!");
-        window.getContentPane().removeAll();
-        window.revalidate();
-        window.repaint();
         crudMenu.add(createMenu);
         crudMenu.add(readMenu);
         crudMenu.add(updateMenu);
@@ -153,9 +163,10 @@ public class Display implements ActionListener {
         c1.add(l1);
         c1.add(l2);
         c1.add(l3);
-        crudPanel.add(c1);
-        window.getContentPane().add(crudPanel);
-        window.setVisible(true);
+        panel.add(c1);
+        window.add(panel);
+        window.revalidate();
+        window.repaint();
 
         users.addActionListener(new ActionListener() {
             @Override
@@ -189,6 +200,9 @@ public class Display implements ActionListener {
         });
     }
 
+    /**
+     * Determine the role of the user
+     */
     private void setCrudperms() {
         setDefaultPerms();
         switch (userRole) {
@@ -204,18 +218,30 @@ public class Display implements ActionListener {
         }
     }
 
+    /**
+     * Gives the perms of CRUD MENU to every users
+     */
     private void setDefaultPerms() {
         updateMenu.add(account);
     }
 
+    /**
+     * Gives the perms of CRUD MENU to all Customers
+     */
     private void setCustPerms() {
         readMenu.add(projects);
     }
 
+    /**
+     * Gives the perms of CRUD MENU to Architects
+     */
     private void setArchPerms() {
         createMenu.add(projects);
     }
 
+    /**
+     * Gives every permsof CRUD MENU to Admin
+     */
     private void setAdminPerms() {
         createMenu.add(users);
         createMenu.add(projects);
@@ -231,7 +257,7 @@ public class Display implements ActionListener {
             logRegActions.checkRegister(firstName, lastName, userMail, passWord, connection);
         }
         else if (actionEvent.getSource() == logIn) {
-            userIdNameRole = logRegActions.checkLogIn(userMail, passWord, connection);
+            String[] userIdNameRole = logRegActions.checkLogIn(userMail, passWord, connection);
             userID = Integer.parseInt(userIdNameRole[0]);
             userFirstName = userIdNameRole[1];
             userLastName = userIdNameRole[2];
@@ -240,15 +266,29 @@ public class Display implements ActionListener {
         }
     }
 
+    private JTextField newMail = new JTextField(15);
+    private JTextField confirmPass = new JTextField(15);
+    private JTextField newPass = new JTextField(15);
+    private JButton confirm = new JButton("Confirm");
+
+    /**
+     * Displays the update profile menu
+     */
     private void profileMenu() {
-        window.getContentPane().removeAll();
-        window.add(newMailLabel);
-        window.add(confirmPassLabel);
-        window.add(newMail);
-        window.add(confirmPass);
-        window.add(newPassLabel);
-        window.add(newPass);
-        window.add(confirm);
+        resetWindow();
+        l1.add(new JLabel("Change mail adress"));
+        l1.add(new JLabel("password"));
+        l2.add(newMail);
+        l2.add(confirmPass);
+        l3.add(new JLabel("New password"));
+        l4.add(newPass);
+        l4.add(confirm);
+        c1.add(l1);
+        c1.add(l2);
+        c1.add(l3);
+        c1.add(l4);
+        panel.add(c1);
+        window.add(panel);
         window.setVisible(true);
 
         confirm.addActionListener(new ActionListener() {
@@ -257,5 +297,55 @@ public class Display implements ActionListener {
                 updateProfile.updateMenu(userID, newMail, passWord, newPass, connection);
             }
         });
+    }
+
+    /**
+     * Reset every content of the window
+     * Must be called before every display
+     */
+    private void resetWindow() {
+
+        //MENUS AND MENULIST
+        accessMenu.removeAll();
+        accessMenu.revalidate();
+        accessMenu.repaint();
+        cho.removeAll();
+        cho.revalidate();
+        cho.repaint();
+
+        //JTEXT AND JPASS
+        userMail.setText(null);
+        passWord.setText(null);
+        newMail.setText(null);
+        confirmPass.setText(null);
+        newPass.setText(null);
+
+        //BOXES
+        l1.removeAll();
+        l1.revalidate();
+        l1.repaint();
+        l2.removeAll();
+        l2.revalidate();
+        l2.repaint();
+        l3.removeAll();
+        l3.revalidate();
+        l3.repaint();
+        l4.removeAll();
+        l4.revalidate();
+        l4.repaint();
+        l5.removeAll();
+        l5.revalidate();
+        l5.repaint();
+        c1.removeAll();
+        c1.revalidate();
+        c1.repaint();
+
+        //PANEL AND WINDOW
+        panel.removeAll();
+        panel.revalidate();
+        panel.repaint();
+        window.getContentPane().removeAll();
+        window.getContentPane().revalidate();
+        window.getContentPane().repaint();
     }
 }
