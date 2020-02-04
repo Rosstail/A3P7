@@ -9,20 +9,20 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Display implements ActionListener {
-    JFrame window = new JFrame();
-    JMenu accessMenu = new JMenu("Se connecter / S'enregistrer");
-    JMenuBar cho = new JMenuBar();
-    JMenuItem connexion = new JMenuItem("Se connecter");
-    JMenuItem registration = new JMenuItem("S'inscrire");
-    JLabel firstNameLabel = new JLabel("Prénom");
-    JLabel lastNameLabel = new JLabel("Nom");
-    JLabel mailLabel = new JLabel("E-Mail");
-    JLabel passLabel = new JLabel("Password");
-    JButton logIn = new JButton("Connexion");
-    JButton signUp = new JButton("Inscription");
-    JPanel registerPanel = new JPanel();
-    JPanel connexionPanel = new JPanel();
-    JPanel logInPanel = new JPanel();
+    private JFrame window = new JFrame();
+    private JMenu accessMenu = new JMenu("Se connecter / S'enregistrer");
+    private JMenuBar cho = new JMenuBar();
+    private JMenuItem connexion = new JMenuItem("Se connecter");
+    private JMenuItem registration = new JMenuItem("S'inscrire");
+    private JLabel firstNameLabel = new JLabel("Prénom");
+    private JLabel lastNameLabel = new JLabel("Nom");
+    private JLabel mailLabel = new JLabel("E-Mail");
+    private JLabel passLabel = new JLabel("Password");
+    private JButton logIn = new JButton("Connexion");
+    private JButton signUp = new JButton("Inscription");
+    private JPanel registerPanel = new JPanel();
+    private JPanel connexionPanel = new JPanel();
+    private JPanel logInPanel = new JPanel();
 
     Box l1 = Box.createHorizontalBox();
     Box l2 = Box.createHorizontalBox();
@@ -48,11 +48,21 @@ public class Display implements ActionListener {
     JPasswordField passWord = new JPasswordField(10);
     JCheckBox checkbox = new JCheckBox("Retenir mes informations");
     CheckIni checkIni = new CheckIni();
-    Actions actions = new Actions();
-    Menu menu = new Menu();
-    String[] userIdRole = new String[] {"a","b"};
+    LogRegActions logRegActions = new LogRegActions();
+    String[] userIdNameRole = new String[] {"a", "b", "c"};
     int userID;
+    String userFirstName;
+    String userLastName;
     String userRole;
+    Connection connection;
+
+    JLabel newMailLabel = new JLabel("Change mail adress");
+    JLabel confirmPassLabel = new JLabel("Actual password *");
+    JLabel newPassLabel = new JLabel("New password");
+    JTextField newMail = new JTextField(15);
+    JTextField confirmPass = new JTextField(15);
+    JTextField newPass = new JTextField(15);
+    JButton confirm = new JButton("Confirm");
 
     public void setWindow() {
         window.setTitle("CA DESIGN - HOME");
@@ -77,7 +87,7 @@ public class Display implements ActionListener {
     /**
      * S'exécute lorsque l'utilisateur choisis de s'inscrire
      */
-    public void displayUserRegistration(){
+    private void displayUserRegistration(){
 
         window.getContentPane().remove(connexionPanel);
         l2.add(firstNameLabel);
@@ -102,7 +112,7 @@ public class Display implements ActionListener {
     /**
      * Modifie la fenêtre pour permettre à l'utilisateur de se connecter
      */
-    public void displayUserConnexion(){
+    private void displayUserConnexion(){
         window.getContentPane().remove(registerPanel);
         l2.add(mailLabel);
         l2.add(passLabel);
@@ -124,11 +134,10 @@ public class Display implements ActionListener {
 
     /**
      * Créer le menu principal CRUD selon le rôle de l'utilisateur
-     * @param role
      */
-    public void displayMainCrudMenu(int userID, String role ){
+    private void displayMainCrudMenu(){
         setCrudperms();
-        window.setTitle("CA DESIGN - Welcome " + role + " " + userID + "!");
+        window.setTitle("CA DESIGN - Welcome [" + userRole + "] " + userFirstName + " " + userLastName + "!");
         window.getContentPane().removeAll();
         window.revalidate();
         window.repaint();
@@ -162,19 +171,18 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("TEST UPDATE PROFILE");
+                profileMenu();
             }
         });
         disconnect.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
+                    connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
                             "anthony", "Atelier2");
                     connection.close();
                     System.out.println("Successfully disconnected.");
-                    window.removeAll();
-                    window.revalidate();
-                    window.setVisible(true);
+                    setWindow();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -182,7 +190,7 @@ public class Display implements ActionListener {
         });
     }
 
-    public void setCrudperms() {
+    private void setCrudperms() {
         setDefaultPerms();
         switch (userRole) {
             case "customer":
@@ -197,19 +205,19 @@ public class Display implements ActionListener {
         }
     }
 
-    public void setDefaultPerms() {
+    private void setDefaultPerms() {
         updateMenu.add(account);
     }
 
-    public void setCustPerms() {
+    private void setCustPerms() {
         readMenu.add(projects);
     }
 
-    public void setArchPerms() {
+    private void setArchPerms() {
         createMenu.add(projects);
     }
 
-    public void setAdminPerms() {
+    private void setAdminPerms() {
         createMenu.add(users);
         createMenu.add(projects);
     }
@@ -221,13 +229,33 @@ public class Display implements ActionListener {
         else if (actionEvent.getSource() == registration)
             displayUserRegistration();
         else if (actionEvent.getSource() == signUp)
-            actions.checkRegister(firstName, lastName, userMail, passWord);
+            logRegActions.checkRegister(firstName, lastName, userMail, passWord);
         else if (actionEvent.getSource() == logIn) {
-            userIdRole = actions.checkLogIn(userMail, passWord);
-            userID = Integer.parseInt(userIdRole[0]);
-            userRole = userIdRole[1];
-            displayMainCrudMenu(userID, userRole);
+            userIdNameRole = logRegActions.checkLogIn(userMail, passWord);
+            userID = Integer.parseInt(userIdNameRole[0]);
+            userFirstName = userIdNameRole[1];
+            userLastName = userIdNameRole[2];
+            userRole = userIdNameRole[3];
+            displayMainCrudMenu();
         }
+    }
 
+    private void profileMenu() {
+        window.getContentPane().removeAll();
+        window.add(newMailLabel);
+        window.add(confirmPassLabel);
+        window.add(newMail);
+        window.add(confirmPass);
+        window.add(newPassLabel);
+        window.add(newPass);
+        window.add(confirm);
+        window.setVisible(true);
+
+        confirm.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateProfile.updateMenu(userID, newMail, passWord, newPass);
+            }
+        });
     }
 }

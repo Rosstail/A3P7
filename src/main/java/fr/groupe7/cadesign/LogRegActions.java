@@ -9,7 +9,7 @@ import java.util.Arrays;
 /**
  * Création de la fenêtre et interface d'accueil (login / register)
  */
-public class Actions {
+public class LogRegActions {
     RegisterToSQL registerToSQL = new RegisterToSQL();
     LogToSQL logToSQL = new LogToSQL();
 
