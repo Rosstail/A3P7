@@ -11,13 +11,11 @@ public class LogToSQL extends JFrame {
      * @param passWordJTF
      * @return
      */
-    public String[] logIn(JTextField userJTF, JPasswordField passWordJTF) {
+    public String[] logIn(JTextField userJTF, JPasswordField passWordJTF, Connection connection) {
         String user = userJTF.getText();
         String pass = passWordJTF.getText();
 
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
-                    "anthony", "Atelier2");
             String strUser = "SELECT user_id, user_firstname, user_name, user_role FROM users WHERE '" + user +
                     "' = user_mail AND '" + pass + "' = user_password";
             Statement statement = connection.createStatement();

@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
 import java.util.Arrays;
 
 /**
@@ -13,16 +14,16 @@ public class LogRegActions {
     RegisterToSQL registerToSQL = new RegisterToSQL();
     LogToSQL logToSQL = new LogToSQL();
 
-    public String[] checkLogIn(JTextField userMail, JPasswordField passWord) {
+    public String[] checkLogIn(JTextField userMail, JPasswordField passWord, Connection connection) {
         if (userMail.getText().length() > 0 && passWord.getPassword().length > 0 )
-            return logToSQL.logIn(userMail, passWord);
+            return logToSQL.logIn(userMail, passWord, connection);
         return null;
     }
 
-    public void checkRegister(JTextField firstName, JTextField lastName, JTextField userMail, JPasswordField passWord) {
+    public void checkRegister(JTextField firstName, JTextField lastName, JTextField userMail, JPasswordField passWord, Connection connection) {
         if (firstName.getText().length() >= 3 && lastName.getText().length() >= 3 &&
                 checkEmail(userMail) && checkPassWord(passWord))
-            registerToSQL.register(firstName, lastName, userMail, passWord);
+            registerToSQL.register(firstName, lastName, userMail, passWord, connection);
     }
     /**
      * Permet de vérifier que l'adresse mail n'est pas erronée

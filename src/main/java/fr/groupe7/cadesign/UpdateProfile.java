@@ -15,24 +15,22 @@ public class UpdateProfile {
     String passWord;
     String newPass;
     Connection connection;
-    public void updateMenu(int userID, JTextField jtfNewMail, JPasswordField jtfConfirmPass, JTextField jtfNewPass) {
+    public void updateMenu(int userID, JTextField jtfNewMail, JPasswordField jtfConfirmPass, JTextField jtfNewPass, Connection connection) {
         newMail = jtfNewMail.getText();
         passWord = jtfConfirmPass.getText();
         newPass = jtfNewPass.getText();
-        if (getPass(userID).equals(passWord)) {
+        if (getPass(userID, connection).equals(passWord)) {
             if (checkNewMail())
-                changesMail(userID);
+                changesMail(userID, connection);
             if (checkNewPassWord())
-                changesPass(userID);
+                changesPass(userID, connection);
         }
     }
 
-    public String getPass(int id) {
+    public String getPass(int id, Connection connection) {
         String strUserPass = "SELECT user_password FROM users WHERE '" + id +
                 "' = user_id";
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
-                    "anthony", "Atelier2");
             Statement statement = connection.createStatement();
             ResultSet results = statement.executeQuery(strUserPass);
             if (results.next()) {
@@ -44,11 +42,9 @@ public class UpdateProfile {
         return null;
     }
 
-    public void changesMail(int userID) {
+    public void changesMail(int userID, Connection connection) {
         String query = "UPDATE users set user_mail = ? WHERE user_id = ?";
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
-                    "anthony", "Atelier2");
             PreparedStatement preparedStmt = connection.prepareStatement(query);
             preparedStmt.setString(1, newMail);
             preparedStmt.setInt(2, userID);
@@ -59,11 +55,9 @@ public class UpdateProfile {
         }
     }
 
-    public void changesPass(int userID) {
+    public void changesPass(int userID, Connection connection) {
         String query = "UPDATE users set user_password = ? WHERE user_id = ?";
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
-                    "anthony", "Atelier2");
             PreparedStatement preparedStmt = connection.prepareStatement(query);
             preparedStmt.setString   (1, newPass);
             preparedStmt.setInt(2, userID);

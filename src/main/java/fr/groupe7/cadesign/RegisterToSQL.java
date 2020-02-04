@@ -18,7 +18,7 @@ public class RegisterToSQL {
      * @param userMailJTF
      * @param passWordJPF
      */
-    public void register(JTextField firstNameJTF, JTextField lastNameJTF, JTextField userMailJTF, JPasswordField passWordJPF) {
+    public void register(JTextField firstNameJTF, JTextField lastNameJTF, JTextField userMailJTF, JPasswordField passWordJPF, Connection connection) {
         String firstName = firstNameJTF.getText();
         String lastName = lastNameJTF.getText();
         String mail = userMailJTF.getText();
@@ -28,8 +28,6 @@ public class RegisterToSQL {
         java.sql.Date startDate = new java.sql.Date(calendar.getTime().getTime());
 
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
-                    "anthony", "Atelier2");
             Statement statement = connection.createStatement();
             ResultSet results = statement.executeQuery(sameMail);
             String query = "INSERT INTO users (user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime) " +
@@ -44,7 +42,6 @@ public class RegisterToSQL {
             if (!results.next()) {
                 System.out.println("SUCCEED");
                 preparedStmt.execute();
-                connection.close();
             }
             else
                 System.out.println("SAME MAIL !");

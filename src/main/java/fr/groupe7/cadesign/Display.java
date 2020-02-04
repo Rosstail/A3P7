@@ -64,7 +64,9 @@ public class Display implements ActionListener {
     JTextField newPass = new JTextField(15);
     JButton confirm = new JButton("Confirm");
 
-    public void setWindow() {
+    public void setWindow() throws SQLException {
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
+                "anthony", "Atelier2");
         window.setTitle("CA DESIGN - HOME");
         window.setSize(1200, 1000);
         window.setLocationRelativeTo(null);
@@ -137,7 +139,7 @@ public class Display implements ActionListener {
      */
     private void displayMainCrudMenu(){
         setCrudperms();
-        window.setTitle("CA DESIGN - Welcome [" + userRole + "] " + userFirstName + " " + userLastName + "!");
+        window.setTitle("CA DESIGN - Welcome [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName + "!");
         window.getContentPane().removeAll();
         window.revalidate();
         window.repaint();
@@ -178,9 +180,6 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-                    connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
-                            "anthony", "Atelier2");
-                    connection.close();
                     System.out.println("Successfully disconnected.");
                     setWindow();
                 } catch (SQLException e) {
@@ -228,10 +227,11 @@ public class Display implements ActionListener {
             displayUserConnexion();
         else if (actionEvent.getSource() == registration)
             displayUserRegistration();
-        else if (actionEvent.getSource() == signUp)
-            logRegActions.checkRegister(firstName, lastName, userMail, passWord);
+        else if (actionEvent.getSource() == signUp) {
+            logRegActions.checkRegister(firstName, lastName, userMail, passWord, connection);
+        }
         else if (actionEvent.getSource() == logIn) {
-            userIdNameRole = logRegActions.checkLogIn(userMail, passWord);
+            userIdNameRole = logRegActions.checkLogIn(userMail, passWord, connection);
             userID = Integer.parseInt(userIdNameRole[0]);
             userFirstName = userIdNameRole[1];
             userLastName = userIdNameRole[2];
@@ -254,7 +254,7 @@ public class Display implements ActionListener {
         confirm.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateProfile.updateMenu(userID, newMail, passWord, newPass);
+                updateProfile.updateMenu(userID, newMail, passWord, newPass, connection);
             }
         });
     }
