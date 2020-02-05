@@ -1,3 +1,4 @@
+
 package fr.groupe7.cadesign;
 
 import javax.swing.*;
@@ -8,6 +9,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * Every displays inside the JFrame
+ */
 public class Display implements ActionListener {
     private JFrame window = new JFrame();
     private JMenu accessMenu = new JMenu("Se connecter / S'enregistrer");
@@ -26,19 +30,25 @@ public class Display implements ActionListener {
     private Box c1 = Box.createVerticalBox();
     private JButton disconnect = new JButton("Disconnect");
     private UpdateProfile updateProfile = new UpdateProfile();
-    private JTextField userMail = new JTextField(10);
+    private JTextField userMailJTF = new JTextField(10);
     private JPasswordField passWord = new JPasswordField(10);
 
     private Connection connection;
 
     /**
-     * Creation of window and connexion.
+     * Initialize the connection to the database, call for displays after
      * @throws SQLException
      */
-    protected void setWindow() throws SQLException {
+    protected void setConnection() throws SQLException {
         connection = DriverManager.getConnection("jdbc:mysql://localhost:8889/bdd_ca_design",
                 "anthony", "Atelier2");
+        setWindow();
+    }
 
+    /**
+     * Displays the main window (COnnection / logIn)
+     */
+    private void setWindow() {
         //*** SET GENERALS INFO OF THE WINDOW ***
         window.setTitle("CA DESIGN - HOME");
         window.setSize(1200, 1000);
@@ -56,7 +66,7 @@ public class Display implements ActionListener {
         l1.add(cho);
         c1.add(l1);
         window.add(c1);
-        checkIni.check(userMail, passWord);
+        checkIni.check(userMailJTF, passWord);
         window.getContentPane().add(panel);
         window.setVisible(true);
     }
@@ -89,7 +99,7 @@ public class Display implements ActionListener {
         l2.add(new JLabel("Password"));
         l3.add(firstName);
         l3.add(lastName);
-        l3.add(userMail);
+        l3.add(userMailJTF);
         l3.add(passWord);
         l4.add(signUp);
         signUp.addActionListener(this);
@@ -118,7 +128,7 @@ public class Display implements ActionListener {
         l1.add(cho);
         l2.add(new JLabel("E-Mail"));
         l2.add(new JLabel("Password"));
-        l3.add(userMail);
+        l3.add(userMailJTF);
         l3.add(passWord);
         l3.add(checkbox);
         l4.add(logIn);
@@ -144,6 +154,7 @@ public class Display implements ActionListener {
     private JMenuItem projects = new JMenuItem("Projects");
     private JMenuItem account = new JMenuItem("Account");
     private JMenuItem users = new JMenuItem("Users");
+    private JMenuItem selfProfile = new JMenuItem("Your Profile");
 
     /**
      * Créer le menu principal CRUD selon le rôle de l'utilisateur
@@ -152,7 +163,7 @@ public class Display implements ActionListener {
         resetWindow();
         setCrudperms();
         //general widnow properties
-        window.setTitle("CA DESIGN - Welcome [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName + "!");
+        window.setTitle("CA DESIGN - Welcome [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
         crudMenu.add(createMenu);
         crudMenu.add(readMenu);
         crudMenu.add(updateMenu);
@@ -183,19 +194,21 @@ public class Display implements ActionListener {
         account.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("TEST UPDATE PROFILE");
                 profileMenu();
             }
         });
         disconnect.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                try {
-                    System.out.println("Successfully disconnected.");
-                    setWindow();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                System.out.println("Successfully disconnected.");
+                setWindow();
+            }
+        });
+        selfProfile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                System.out.println("Consulting your profile");
+                selfProfileCheck();
             }
         });
     }
@@ -222,6 +235,7 @@ public class Display implements ActionListener {
      * Gives the perms of CRUD MENU to every users
      */
     private void setDefaultPerms() {
+        readMenu.add(selfProfile);
         updateMenu.add(account);
     }
 
@@ -247,6 +261,8 @@ public class Display implements ActionListener {
         createMenu.add(projects);
     }
 
+    private String userMail;
+    private String userSignDateTime;
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         if (actionEvent.getSource() == connexion)
@@ -254,28 +270,60 @@ public class Display implements ActionListener {
         else if (actionEvent.getSource() == registration)
             displayUserRegistration();
         else if (actionEvent.getSource() == signUp) {
-            logRegActions.checkRegister(firstName, lastName, userMail, passWord, connection);
+            logRegActions.checkRegister(firstName, lastName, userMailJTF, passWord, connection);
         }
         else if (actionEvent.getSource() == logIn) {
-            String[] userIdNameRole = logRegActions.checkLogIn(userMail, passWord, connection);
+            String[] userIdNameRole = logRegActions.checkLogIn(userMailJTF, passWord, connection);
             userID = Integer.parseInt(userIdNameRole[0]);
             userFirstName = userIdNameRole[1];
             userLastName = userIdNameRole[2];
-            userRole = userIdNameRole[3];
+            userMail = userIdNameRole[3];
+            userRole = userIdNameRole[4];
+            userSignDateTime = userIdNameRole[5];
             displayMainCrudMenu();
         }
+    }
+
+    private void selfProfileCheck() {
+        resetWindow();
+        window.setTitle("CA DESIGN - YOUR PROFILE [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
+        l1.add(new JLabel("   First name   "));
+        l1.add(new JLabel("   Last name   "));
+        l1.add(new JLabel("   Mail adress  "));
+        l1.add(new JLabel("   Role   "));
+        l1.add(new JLabel("   Sign datetime   "));
+        l2.add(new JLabel(userFirstName));
+        l2.add(new JLabel(userLastName));
+        l2.add(new JLabel(userMail));
+        l2.add(new JLabel(userRole));
+        l2.add(new JLabel(userSignDateTime));
+        l3.add(back);
+        c1.add(l1);
+        c1.add(l2);
+        c1.add(l3);
+        panel.add(c1);
+        window.add(panel);
+        window.setVisible(true);
+
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayMainCrudMenu();
+            }
+        });
     }
 
     private JTextField newMail = new JTextField(15);
     private JTextField confirmPass = new JTextField(15);
     private JTextField newPass = new JTextField(15);
     private JButton confirm = new JButton("Confirm");
-
+    private JButton back = new JButton("Back");
     /**
      * Displays the update profile menu
      */
     private void profileMenu() {
         resetWindow();
+        window.setTitle("CA DESIGN - UPDATE PROFILE [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
         l1.add(new JLabel("Change mail adress"));
         l1.add(new JLabel("password"));
         l2.add(newMail);
@@ -283,10 +331,12 @@ public class Display implements ActionListener {
         l3.add(new JLabel("New password"));
         l4.add(newPass);
         l4.add(confirm);
+        l5.add(back);
         c1.add(l1);
         c1.add(l2);
         c1.add(l3);
         c1.add(l4);
+        c1.add(l5);
         panel.add(c1);
         window.add(panel);
         window.setVisible(true);
@@ -295,6 +345,12 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateProfile.updateMenu(userID, newMail, passWord, newPass, connection);
+            }
+        });
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayMainCrudMenu();
             }
         });
     }
@@ -314,7 +370,7 @@ public class Display implements ActionListener {
         cho.repaint();
 
         //JTEXT AND JPASS
-        userMail.setText(null);
+        userMailJTF.setText(null);
         passWord.setText(null);
         newMail.setText(null);
         confirmPass.setText(null);

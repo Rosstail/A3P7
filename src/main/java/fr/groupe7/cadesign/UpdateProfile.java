@@ -14,7 +14,6 @@ public class UpdateProfile {
     String newMail;
     String passWord;
     String newPass;
-    Connection connection;
     public void updateMenu(int userID, JTextField jtfNewMail, JPasswordField jtfConfirmPass, JTextField jtfNewPass, Connection connection) {
         newMail = jtfNewMail.getText();
         passWord = jtfConfirmPass.getText();

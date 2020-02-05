@@ -6,6 +6,6 @@ public class App {
     static Display display = new Display();
 
     public static void main(String[] args) throws SQLException {
-        display.setWindow();
+        display.setConnection();
     }
 }
