@@ -32,6 +32,7 @@ public class Display implements ActionListener {
     private UpdateProfile updateProfile = new UpdateProfile();
     private JTextField userMailJTF = new JTextField(10);
     private JPasswordField passWord = new JPasswordField(10);
+    private JPasswordField passWordConfirm = new JPasswordField(10);
 
     private Connection connection;
 
@@ -97,10 +98,12 @@ public class Display implements ActionListener {
         l2.add(new JLabel("Nom"));
         l2.add(new JLabel("E-Mail"));
         l2.add(new JLabel("Password"));
+        l2.add(new JLabel("Confirm Password"));
         l3.add(firstName);
         l3.add(lastName);
         l3.add(userMailJTF);
         l3.add(passWord);
+        l3.add(passWordConfirm);
         l4.add(signUp);
         signUp.addActionListener(this);
         c1.add(l1);
@@ -164,10 +167,6 @@ public class Display implements ActionListener {
         setCrudperms();
         //general widnow properties
         window.setTitle("CA DESIGN - Welcome [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
-        crudMenu.add(createMenu);
-        crudMenu.add(readMenu);
-        crudMenu.add(updateMenu);
-        crudMenu.add(deleteMenu);
         crudBar.add(crudMenu);
         l1.add(crudBar);
         l3.add(disconnect);
@@ -237,6 +236,8 @@ public class Display implements ActionListener {
     private void setDefaultPerms() {
         readMenu.add(selfProfile);
         updateMenu.add(account);
+        crudMenu.add(readMenu);
+        crudMenu.add(updateMenu);
     }
 
     /**
@@ -251,6 +252,7 @@ public class Display implements ActionListener {
      */
     private void setArchPerms() {
         createMenu.add(projects);
+        crudMenu.add(createMenu);
     }
 
     /**
@@ -259,6 +261,8 @@ public class Display implements ActionListener {
     private void setAdminPerms() {
         createMenu.add(users);
         createMenu.add(projects);
+        crudMenu.add(deleteMenu);
+        crudMenu.add(createMenu);
     }
 
     private String userMail;
@@ -270,7 +274,8 @@ public class Display implements ActionListener {
         else if (actionEvent.getSource() == registration)
             displayUserRegistration();
         else if (actionEvent.getSource() == signUp) {
-            logRegActions.checkRegister(firstName, lastName, userMailJTF, passWord, connection);
+            logRegActions.checkRegister(firstName, lastName, userMailJTF, passWord, passWordConfirm, connection);
+            displayUserConnexion();
         }
         else if (actionEvent.getSource() == logIn) {
             String[] userIdNameRole = logRegActions.checkLogIn(userMailJTF, passWord, connection);

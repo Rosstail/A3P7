@@ -43,8 +43,9 @@ public class RegisterToSQL {
                 System.out.println("SUCCEED");
                 preparedStmt.execute();
             }
-            else
+            else {
                 System.out.println("SAME MAIL !");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -20,10 +20,15 @@ public class LogRegActions {
         return null;
     }
 
-    public void checkRegister(JTextField firstName, JTextField lastName, JTextField userMail, JPasswordField passWord, Connection connection) {
+    public void checkRegister(JTextField firstName, JTextField lastName, JTextField userMail, JPasswordField passWord, JPasswordField passwordConfirm, Connection connection) {
         if (firstName.getText().length() >= 3 && lastName.getText().length() >= 3 &&
-                checkEmail(userMail) && checkPassWord(passWord))
-            registerToSQL.register(firstName, lastName, userMail, passWord, connection);
+                checkEmail(userMail) && checkPassWord(passWord)) {
+            if (passWord.getText().equals(passwordConfirm.getText())) {
+                registerToSQL.register(firstName, lastName, userMail, passWord, connection);
+            }
+            else
+                System.out.println("Passwords aren't the same");
+        }
     }
     /**
      * Permet de vérifier que l'adresse mail n'est pas erronée
