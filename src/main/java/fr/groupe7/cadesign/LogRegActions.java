@@ -14,9 +14,9 @@ public class LogRegActions {
     RegisterToSQL registerToSQL = new RegisterToSQL();
     LogToSQL logToSQL = new LogToSQL();
 
-    public String[] checkLogIn(JTextField userMail, JPasswordField passWord, Connection connection) {
+    public String[] checkLogIn(JTextField userMail, JPasswordField passWord, Connection connection, JCheckBox checkbox) {
         if (userMail.getText().length() > 0 && passWord.getPassword().length > 0 )
-            return logToSQL.logIn(userMail, passWord, connection);
+            return logToSQL.logIn(userMail, passWord, connection, checkbox);
         return null;
     }
 

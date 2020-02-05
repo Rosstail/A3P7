@@ -1,6 +1,7 @@
 package fr.groupe7.cadesign;
 
 import javax.swing.*;
+import java.awt.*;
 import java.sql.*;
 
 public class LogToSQL extends JFrame {
@@ -9,11 +10,13 @@ public class LogToSQL extends JFrame {
      * Retourne un tableau String contenant l'ID et le role de l'utilisateur si celui-ci existe
      * @param userJTF
      * @param passWordJTF
+     * @param checkbox
      * @return
      */
-    public String[] logIn(JTextField userJTF, JPasswordField passWordJTF, Connection connection) {
+    public String[] logIn(JTextField userJTF, JPasswordField passWordJTF, Connection connection, JCheckBox checkbox) {
         String user = userJTF.getText();
         String pass = passWordJTF.getText();
+        CreateIni createIni = new CreateIni();
 
         try {
             String strUser = "SELECT user_id, user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users WHERE '" + user +
@@ -21,6 +24,8 @@ public class LogToSQL extends JFrame {
             Statement statement = connection.createStatement();
             ResultSet results = statement.executeQuery(strUser);
             if (results.next()) {
+                if (checkbox.isSelected())
+                    createIni.creation(userJTF, passWordJTF);
                 int userID = results.getInt("user_id");
                 String userFirstName = results.getString("user_firstname");
                 String userLastName = results.getString("user_name");

@@ -29,7 +29,6 @@ public class Display implements ActionListener {
     private Box c1 = Box.createVerticalBox();
     private JButton disconnect = new JButton("Disconnect");
     private UpdateProfile updateProfile = new UpdateProfile();
-    private Filters filters = new Filters();
     private JTextField userMailJTF = new JTextField(10);
     private JPasswordField passWord = new JPasswordField(10);
     private JPasswordField passWordConfirm = new JPasswordField(10);
@@ -67,7 +66,6 @@ public class Display implements ActionListener {
         l1.add(cho);
         c1.add(l1);
         window.add(c1);
-        checkIni.check(userMailJTF, passWord);
         window.getContentPane().add(panel);
         window.setVisible(true);
     }
@@ -75,7 +73,6 @@ public class Display implements ActionListener {
     private JTextField firstName = new JTextField(10);
     private JTextField lastName = new JTextField(10);
     private JCheckBox checkbox = new JCheckBox("Retenir mes informations");
-    private CheckIni checkIni = new CheckIni();
     private LogRegActions logRegActions = new LogRegActions();
     private int userID;
     private String userFirstName;
@@ -117,6 +114,7 @@ public class Display implements ActionListener {
         window.repaint();
     }
 
+    CheckIni checkIni = new CheckIni();
     /**
      * Modifie la fenêtre pour permettre à l'utilisateur de se connecter
      */
@@ -133,6 +131,7 @@ public class Display implements ActionListener {
         l2.add(new JLabel("Password"));
         l3.add(userMailJTF);
         l3.add(passWord);
+        checkIni.check(userMailJTF, passWord);
         l3.add(checkbox);
         l4.add(logIn);
         c1.add(l1);
@@ -280,7 +279,7 @@ public class Display implements ActionListener {
             displayUserConnexion();
         }
         else if (actionEvent.getSource() == logIn) {
-            String[] userIdNameRole = logRegActions.checkLogIn(userMailJTF, passWord, connection);
+            String[] userIdNameRole = logRegActions.checkLogIn(userMailJTF, passWord, connection, checkbox);
             userID = Integer.parseInt(userIdNameRole[0]);
             userFirstName = userIdNameRole[1];
             userLastName = userIdNameRole[2];
@@ -427,15 +426,15 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (firstNameFilter.getText().length() >= 3 && lastNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_firstname LIKE '%" + firstNameFilter.getText() + "' AND user_name LIKE '%" + lastNameFilter.getText() + "%'";
+                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "' AND user_name LIKE '%" + lastNameFilter.getText() + "'";
                     listUsers();
                 }
                 else if (firstNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_firstname LIKE '%" + firstNameFilter.getText() + "'";
+                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "'";
                     listUsers();
                 }
                 else if(lastNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_name LIKE '%" + lastNameFilter.getText() + "'";
+                    request = request + " WHERE user_name LIKE '" + lastNameFilter.getText() + "'";
                     listUsers();
                 }
                 else {
@@ -446,6 +445,29 @@ public class Display implements ActionListener {
             }
         });
     }
+
+    /*private void upDateFilter(JScrollPane jsp, JTable table, DefaultTableModel aModel) {
+        c1.add(l1);
+        c1.add(l2);
+
+        //Remmplissage du tableau
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            int colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                aModel.addRow(objects);
+            }
+            table.setModel(aModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }*/
 
     /**
      * Reset every content of the window
