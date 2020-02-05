@@ -2,12 +2,11 @@
 package fr.groupe7.cadesign;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 /**
  * Every displays inside the JFrame
@@ -30,6 +29,7 @@ public class Display implements ActionListener {
     private Box c1 = Box.createVerticalBox();
     private JButton disconnect = new JButton("Disconnect");
     private UpdateProfile updateProfile = new UpdateProfile();
+    private Filters filters = new Filters();
     private JTextField userMailJTF = new JTextField(10);
     private JPasswordField passWord = new JPasswordField(10);
     private JPasswordField passWordConfirm = new JPasswordField(10);
@@ -181,6 +181,7 @@ public class Display implements ActionListener {
         users.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                listUsers();
                 System.out.println("USERS");
             }
         });
@@ -252,6 +253,7 @@ public class Display implements ActionListener {
      */
     private void setArchPerms() {
         createMenu.add(projects);
+        readMenu.add(users);
         crudMenu.add(createMenu);
     }
 
@@ -356,6 +358,91 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 displayMainCrudMenu();
+            }
+        });
+    }
+
+    private String[] entetes = {"firstname", "name", "mail", "role", "signdatetime"};
+    private String request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
+    private JTextField firstNameFilter = new JTextField();
+    private JTextField lastNameFilter = new JTextField();
+    private JButton filterButton = new JButton("Filter");
+
+    private void listUsers() {
+        resetWindow();
+        //DESIGN
+        window.setTitle("CA DESIGN - USERS [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
+        l1.add(new JLabel("Filter by first name ( => 3 )"));
+        l1.add(new JLabel("Filter by last name ( => 3 )"));
+        l2.add(firstNameFilter);
+        l2.add(lastNameFilter);
+        l2.add(filterButton);
+        c1.add(l1);
+        c1.add(l2);
+
+        //CREATION OF TABLE
+        JTable table = new JTable();
+        DefaultTableModel aModel = (DefaultTableModel) table.getModel();
+        aModel.setColumnIdentifiers(entetes);
+        JScrollPane jsp = new JScrollPane(table);
+        Dimension dimension = new Dimension(500, 300);
+        jsp.setPreferredSize(dimension);
+        aModel.setColumnIdentifiers(entetes);
+
+        //Remmplissage du tableau
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            int colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                aModel.addRow(objects);
+            }
+            table.setModel(aModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
+        //*****************
+        l4.add(jsp);
+        l5.add(back);
+        c1.add(l4);
+        c1.add(l5);
+        panel.add(c1);
+        window.add(panel);
+        window.setVisible(true);
+
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayMainCrudMenu();
+            }
+        });
+        filterButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (firstNameFilter.getText().length() >= 3 && lastNameFilter.getText().length() >= 3) {
+                    request = request + " WHERE user_firstname LIKE '%" + firstNameFilter.getText() + "' AND user_name LIKE '%" + lastNameFilter.getText() + "%'";
+                    listUsers();
+                }
+                else if (firstNameFilter.getText().length() >= 3) {
+                    request = request + " WHERE user_firstname LIKE '%" + firstNameFilter.getText() + "'";
+                    listUsers();
+                }
+                else if(lastNameFilter.getText().length() >= 3) {
+                    request = request + " WHERE user_name LIKE '%" + lastNameFilter.getText() + "'";
+                    listUsers();
+                }
+                else {
+                    System.out.println("Filtres trop courts !");
+                    request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
+                    listUsers();
+                }
             }
         });
     }
