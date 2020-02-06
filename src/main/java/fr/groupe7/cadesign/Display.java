@@ -2,6 +2,8 @@
 package fr.groupe7.cadesign;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -12,6 +14,9 @@ import java.sql.*;
  * Every displays inside the JFrame
  */
 public class Display implements ActionListener {
+    private UpdateProfile updateProfile = new UpdateProfile();
+    private EditableTableUsers editableTableUsers = new EditableTableUsers();
+
     private JFrame window = new JFrame();
     private JMenu accessMenu = new JMenu("Se connecter / S'enregistrer");
     private JMenuBar cho = new JMenuBar();
@@ -28,7 +33,6 @@ public class Display implements ActionListener {
     private Box l5 = Box.createHorizontalBox();
     private Box c1 = Box.createVerticalBox();
     private JButton disconnect = new JButton("Disconnect");
-    private UpdateProfile updateProfile = new UpdateProfile();
     private JTextField userMailJTF = new JTextField(10);
     private JPasswordField passWord = new JPasswordField(10);
     private JPasswordField passWordConfirm = new JPasswordField(10);
@@ -45,6 +49,7 @@ public class Display implements ActionListener {
         setWindow();
     }
 
+    JButton leave = new JButton("EXIT");
     /**
      * Displays the main window (Connection / logIn)
      */
@@ -64,10 +69,19 @@ public class Display implements ActionListener {
         registration.addActionListener(this);
         cho.add(accessMenu);
         l1.add(cho);
+        l2.add(leave);
         c1.add(l1);
+        c1.add(l2);
         window.add(c1);
         window.getContentPane().add(panel);
         window.setVisible(true);
+
+        leave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                window.dispose();
+            }
+        });
     }
 
     private JTextField firstName = new JTextField(10);
@@ -159,7 +173,7 @@ public class Display implements ActionListener {
     private JMenuItem selfProfile = new JMenuItem("Your Profile");
 
     /**
-     * Createthe CRUD MENU using the user role
+     * Create the CRUD MENU using the user role
      */
     private void displayMainCrudMenu(){
         resetWindow();
@@ -181,7 +195,6 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 listUsers();
-                System.out.println("USERS");
             }
         });
         projects.addActionListener(new ActionListener() {
@@ -193,7 +206,8 @@ public class Display implements ActionListener {
         account.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                profileMenu();
+                selfProfileCheck();
+                //profileMenu();
             }
         });
         disconnect.addActionListener(new ActionListener() {
@@ -295,6 +309,7 @@ public class Display implements ActionListener {
         }
     }
 
+    JButton updateAccount = new JButton("Updates Infos");
     private void selfProfileCheck() {
         resetWindow();
         window.setTitle("CA DESIGN - YOUR PROFILE [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
@@ -308,14 +323,22 @@ public class Display implements ActionListener {
         l2.add(new JLabel(userMail));
         l2.add(new JLabel(userRole));
         l2.add(new JLabel(userSignDateTime));
-        l3.add(back);
+        l3.add(updateAccount);
+        l4.add(back);
         c1.add(l1);
         c1.add(l2);
         c1.add(l3);
+        c1.add(l4);
         panel.add(c1);
         window.add(panel);
         window.setVisible(true);
 
+        updateAccount.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateProfileMenu();
+            }
+        });
         back.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -332,7 +355,7 @@ public class Display implements ActionListener {
     /**
      * Displays the update profile menu
      */
-    private void profileMenu() {
+    private void updateProfileMenu() {
         resetWindow();
         window.setTitle("CA DESIGN - UPDATE PROFILE [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
         l1.add(new JLabel("Change mail adress"));
@@ -356,12 +379,13 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateProfile.updateMenu(userID, newMail, passWord, newPass, connection);
+                displayMainCrudMenu();
             }
         });
         back.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                displayMainCrudMenu();
+                selfProfileCheck();
             }
         });
     }
@@ -376,6 +400,7 @@ public class Display implements ActionListener {
     DefaultTableModel aModel = (DefaultTableModel) table.getModel();
     JScrollPane jsp = new JScrollPane(table);
     int colCount;
+    JButton editSQL = new JButton("EDIT");
 
     /**
      * Create the first board without filter, should be called once per code or before using back button
@@ -414,6 +439,10 @@ public class Display implements ActionListener {
             e.printStackTrace();
         }
 
+        if (userRole.equals("admin")) {
+            l3.add(editSQL);
+        }
+
         request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
         //*****************
         l3.add(jsp);
@@ -424,6 +453,12 @@ public class Display implements ActionListener {
         window.add(panel);
         window.setVisible(true);
 
+        /*aModel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editableTableUsers(tableModelEvent, table, connection);
+            }
+        });*/
         back.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -434,7 +469,8 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (firstNameFilter.getText().length() >= 3 && lastNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "%' AND user_name LIKE '" + lastNameFilter.getText() + "%'";
+                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "%' AND user_name LIKE '" +
+                            lastNameFilter.getText() + "%'";
                     updateBoard();
                 }
                 else if (firstNameFilter.getText().length() >= 3) {
@@ -459,12 +495,15 @@ public class Display implements ActionListener {
      * to avoid adding multiple WHERE
      */
     private void updateBoard() {
+        //
+        EditableTableUsers editableTableUsers = new EditableTableUsers();
         if (aModel.getRowCount() > 0) {
             for (int i = aModel.getRowCount() - 1; i > -1; i--) {
                 aModel.removeRow(i);
+
             }
         }
-        l3.remove(jsp);
+        l3.removeAll();
         l3.revalidate();
         l3.repaint();
         try {
@@ -484,8 +523,20 @@ public class Display implements ActionListener {
             e.printStackTrace();
         }
         l3.add(jsp);
+        if (userRole.equals("admin")) {
+            l3.add(editSQL);
+        }
         request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
         window.setVisible(true);
+
+        //
+        aModel.addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                editableTableUsers.editUsers(e, table, connection);
+            }
+        });
+        //
     }
 
     /**
