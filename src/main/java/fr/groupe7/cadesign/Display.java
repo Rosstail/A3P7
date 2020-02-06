@@ -46,7 +46,7 @@ public class Display implements ActionListener {
     }
 
     /**
-     * Displays the main window (COnnection / logIn)
+     * Displays the main window (Connection / logIn)
      */
     private void setWindow() {
         //*** SET GENERALS INFO OF THE WINDOW ***
@@ -80,7 +80,7 @@ public class Display implements ActionListener {
     private String userRole;
 
     /**
-     * S'exécute lorsque l'utilisateur choisis de s'inscrire
+     * Modify the window to able user to register as default user
      */
     private void displayUserRegistration(){
         resetWindow();
@@ -116,7 +116,7 @@ public class Display implements ActionListener {
 
     CheckIni checkIni = new CheckIni();
     /**
-     * Modifie la fenêtre pour permettre à l'utilisateur de se connecter
+     * Modify the window to able the user to connect
      */
     private void displayUserConnexion(){
         resetWindow();
@@ -159,7 +159,7 @@ public class Display implements ActionListener {
     private JMenuItem selfProfile = new JMenuItem("Your Profile");
 
     /**
-     * Créer le menu principal CRUD selon le rôle de l'utilisateur
+     * Createthe CRUD MENU using the user role
      */
     private void displayMainCrudMenu(){
         resetWindow();
@@ -268,6 +268,11 @@ public class Display implements ActionListener {
 
     private String userMail;
     private String userSignDateTime;
+
+    /**
+     * Some buttons check if user choose to register / connect or confirm connection / registering.
+     * @param actionEvent
+     */
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         if (actionEvent.getSource() == connexion)
@@ -366,7 +371,15 @@ public class Display implements ActionListener {
     private JTextField firstNameFilter = new JTextField();
     private JTextField lastNameFilter = new JTextField();
     private JButton filterButton = new JButton("Filter");
+    Dimension dimension = new Dimension(500, 300);
+    JTable table = new JTable();
+    DefaultTableModel aModel = (DefaultTableModel) table.getModel();
+    JScrollPane jsp = new JScrollPane(table);
+    int colCount;
 
+    /**
+     * Create the first board without filter, should be called once per code or before using back button
+     */
     private void listUsers() {
         resetWindow();
         //DESIGN
@@ -380,20 +393,15 @@ public class Display implements ActionListener {
         c1.add(l2);
 
         //CREATION OF TABLE
-        JTable table = new JTable();
-        DefaultTableModel aModel = (DefaultTableModel) table.getModel();
         aModel.setColumnIdentifiers(entetes);
-        JScrollPane jsp = new JScrollPane(table);
-        Dimension dimension = new Dimension(500, 300);
         jsp.setPreferredSize(dimension);
-        aModel.setColumnIdentifiers(entetes);
 
         //Remmplissage du tableau
         try {
             Statement statement = connection.createStatement();
             ResultSet results = statement.executeQuery(request);
             ResultSetMetaData meta = results.getMetaData();
-            int colCount = meta.getColumnCount();
+            colCount = meta.getColumnCount();
             while (results.next()) {
                 Object[] objects = new Object[colCount];
                 for(int i = 0; i < colCount; i++) {
@@ -408,10 +416,10 @@ public class Display implements ActionListener {
 
         request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
         //*****************
-        l4.add(jsp);
-        l5.add(back);
+        l3.add(jsp);
+        l4.add(back);
+        c1.add(l3);
         c1.add(l4);
-        c1.add(l5);
         panel.add(c1);
         window.add(panel);
         window.setVisible(true);
@@ -426,36 +434,44 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (firstNameFilter.getText().length() >= 3 && lastNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "' AND user_name LIKE '%" + lastNameFilter.getText() + "'";
-                    listUsers();
+                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "%' AND user_name LIKE '" + lastNameFilter.getText() + "%'";
+                    updateBoard();
                 }
                 else if (firstNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "'";
-                    listUsers();
+                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "%'";
+                    updateBoard();
                 }
                 else if(lastNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_name LIKE '" + lastNameFilter.getText() + "'";
-                    listUsers();
+                    request = request + " WHERE user_name LIKE '" + lastNameFilter.getText() + "%'";
+                    updateBoard();
                 }
                 else {
                     System.out.println("Filtres trop courts !");
                     request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
-                    listUsers();
+                    updateBoard();
                 }
             }
         });
     }
 
-    /*private void upDateFilter(JScrollPane jsp, JTable table, DefaultTableModel aModel) {
-        c1.add(l1);
-        c1.add(l2);
-
-        //Remmplissage du tableau
+    /**
+     * Update the board with new filters. Filters are reseted after because JTextfield keeps the text
+     * to avoid adding multiple WHERE
+     */
+    private void updateBoard() {
+        if (aModel.getRowCount() > 0) {
+            for (int i = aModel.getRowCount() - 1; i > -1; i--) {
+                aModel.removeRow(i);
+            }
+        }
+        l3.remove(jsp);
+        l3.revalidate();
+        l3.repaint();
         try {
             Statement statement = connection.createStatement();
             ResultSet results = statement.executeQuery(request);
             ResultSetMetaData meta = results.getMetaData();
-            int colCount = meta.getColumnCount();
+            colCount = meta.getColumnCount();
             while (results.next()) {
                 Object[] objects = new Object[colCount];
                 for(int i = 0; i < colCount; i++) {
@@ -467,7 +483,10 @@ public class Display implements ActionListener {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }*/
+        l3.add(jsp);
+        request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
+        window.setVisible(true);
+    }
 
     /**
      * Reset every content of the window
