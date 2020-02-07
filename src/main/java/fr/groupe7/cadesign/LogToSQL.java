@@ -42,7 +42,6 @@ public class LogToSQL extends JFrame {
             }
             else {
                 System.out.println("Connexion failed.");
-                connection.close();
             }
         } catch (SQLException e) {
             e.printStackTrace();

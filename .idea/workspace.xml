@@ -4,25 +4,18 @@
     <list default="true" id="e40ce6f4-1d8d-41b0-a8b6-12a5e178753c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.gradle/5.2.1/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.2.1/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/5.2.1/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.2.1/executionHistory/executionHistory.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/5.2.1/fileContent/fileContent.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.2.1/fileContent/fileContent.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/5.2.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.2.1/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/5.2.1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.2.1/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/5.2.1/javaCompile/classAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.2.1/javaCompile/classAnalysis.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/5.2.1/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.2.1/javaCompile/javaCompile.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$10.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$10.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$4.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$5.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$6.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$6.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$7.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$7.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$8.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$8.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$9.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display$9.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/Display.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/LogToSQL.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/fr/groupe7/cadesign/LogToSQL.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/infosCo.ini" beforeDir="false" afterPath="$PROJECT_DIR$/infosCo.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/fr/groupe7/cadesign/Display.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/groupe7/cadesign/Display.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/groupe7/cadesign/EditableTableUsers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/groupe7/cadesign/EditableTableUsers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/groupe7/cadesign/LogToSQL.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/groupe7/cadesign/LogToSQL.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

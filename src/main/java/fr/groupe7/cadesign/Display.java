@@ -310,6 +310,7 @@ public class Display implements ActionListener {
     }
 
     JButton updateAccount = new JButton("Updates Infos");
+    private JButton backProfileToCRUD = new JButton("Back");
     private void selfProfileCheck() {
         resetWindow();
         window.setTitle("CA DESIGN - YOUR PROFILE [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
@@ -324,7 +325,7 @@ public class Display implements ActionListener {
         l2.add(new JLabel(userRole));
         l2.add(new JLabel(userSignDateTime));
         l3.add(updateAccount);
-        l4.add(back);
+        l4.add(backProfileToCRUD);
         c1.add(l1);
         c1.add(l2);
         c1.add(l3);
@@ -339,7 +340,7 @@ public class Display implements ActionListener {
                 updateProfileMenu();
             }
         });
-        back.addActionListener(new ActionListener() {
+        backProfileToCRUD.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 displayMainCrudMenu();
@@ -351,7 +352,7 @@ public class Display implements ActionListener {
     private JTextField confirmPass = new JTextField(15);
     private JTextField newPass = new JTextField(15);
     private JButton confirm = new JButton("Confirm");
-    private JButton back = new JButton("Back");
+    private JButton backUpdateAccountToProfile = new JButton("Back");
     /**
      * Displays the update profile menu
      */
@@ -365,7 +366,7 @@ public class Display implements ActionListener {
         l3.add(new JLabel("New password"));
         l4.add(newPass);
         l4.add(confirm);
-        l5.add(back);
+        l5.add(backUpdateAccountToProfile);
         c1.add(l1);
         c1.add(l2);
         c1.add(l3);
@@ -382,7 +383,7 @@ public class Display implements ActionListener {
                 displayMainCrudMenu();
             }
         });
-        back.addActionListener(new ActionListener() {
+        backUpdateAccountToProfile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 selfProfileCheck();
@@ -390,17 +391,18 @@ public class Display implements ActionListener {
         });
     }
 
-    private String[] entetes = {"firstname", "name", "mail", "role", "signdatetime"};
-    private String request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
+    private String[] entetes = {"id", "name", "firstname", "mail", "password", "role", "signdatetime"};
+    private String request = "SELECT user_id, user_firstname, user_name, user_password, user_mail, user_role, user_signdatetime FROM users";
     private JTextField firstNameFilter = new JTextField();
     private JTextField lastNameFilter = new JTextField();
     private JButton filterButton = new JButton("Filter");
-    Dimension dimension = new Dimension(500, 300);
+    Dimension dimension = new Dimension(700, 400);
     JTable table = new JTable();
     DefaultTableModel aModel = (DefaultTableModel) table.getModel();
     JScrollPane jsp = new JScrollPane(table);
     int colCount;
     JButton editSQL = new JButton("EDIT");
+    private JButton backFromUserListToCRUD = new JButton("Back");
 
     /**
      * Create the first board without filter, should be called once per code or before using back button
@@ -439,27 +441,23 @@ public class Display implements ActionListener {
             e.printStackTrace();
         }
 
+
+        request = "SELECT user_id, user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users";
+        //*****************
+        l3.add(jsp);
+
         if (userRole.equals("admin")) {
             l3.add(editSQL);
         }
 
-        request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
-        //*****************
-        l3.add(jsp);
-        l4.add(back);
+        l4.add(backFromUserListToCRUD);
         c1.add(l3);
         c1.add(l4);
         panel.add(c1);
         window.add(panel);
         window.setVisible(true);
 
-        /*aModel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editableTableUsers(tableModelEvent, table, connection);
-            }
-        });*/
-        back.addActionListener(new ActionListener() {
+        backFromUserListToCRUD.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 displayMainCrudMenu();
@@ -483,7 +481,7 @@ public class Display implements ActionListener {
                 }
                 else {
                     System.out.println("Filtres trop courts !");
-                    request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
+                    request = "SELECT user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users";
                     updateBoard();
                 }
             }

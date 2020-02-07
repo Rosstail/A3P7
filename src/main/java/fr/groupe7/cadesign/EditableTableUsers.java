@@ -13,15 +13,16 @@ public class EditableTableUsers {
         if (t.getType() == TableModelEvent.UPDATE) {
             int row = t.getFirstRow();
             int column = t.getColumn();
+            Object id = table.getValueAt(row, 0);
             String newValue = (String)table.getValueAt(row, column);
             System.out.println(newValue);
-            String request = "SELECT user_firstname, user_name, user_mail, user_password, user_role, user_signdatetime FROM users WHERE user_id = "+(row+1);
+            String request = "SELECT user_id, user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users WHERE user_id = " + id;
             try {
                 Statement statement = connection.createStatement();
                 ResultSet results = statement.executeQuery(request);
                 ResultSetMetaData rsmd = results.getMetaData();
                 String columnToEdit = rsmd.getColumnName(column+1);
-                String update = "UPDATE users SET "+columnToEdit+" = '"+newValue+"' WHERE user_id = "+(row+1);
+                String update = "UPDATE users SET "+columnToEdit+" = '"+newValue+"' WHERE user_id = "+ id;
                 System.out.println(update);
                 statement.executeUpdate(update);
             } catch (SQLException e) {
