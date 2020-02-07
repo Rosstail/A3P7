@@ -194,7 +194,7 @@ public class Display implements ActionListener {
         users.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                listUsers();
+                listUsersAdmin();
             }
         });
         projects.addActionListener(new ActionListener() {
@@ -311,6 +311,10 @@ public class Display implements ActionListener {
 
     JButton updateAccount = new JButton("Updates Infos");
     private JButton backProfileToCRUD = new JButton("Back");
+
+    /**
+     * Default user can check his own profile and access to the Account modification
+     */
     private void selfProfileCheck() {
         resetWindow();
         window.setTitle("CA DESIGN - YOUR PROFILE [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
@@ -391,8 +395,8 @@ public class Display implements ActionListener {
         });
     }
 
-    private String[] entetes = {"id", "name", "firstname", "mail", "password", "role", "signdatetime"};
-    private String request = "SELECT user_id, user_firstname, user_name, user_password, user_mail, user_role, user_signdatetime FROM users";
+    private String[] headerUsers = {"ID", "Name", "First name", "Mail adress", "Password", "Role", "Sign datetime"};
+    private String request = "SELECT user_id, user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users";
     private JTextField firstNameFilter = new JTextField();
     private JTextField lastNameFilter = new JTextField();
     private JButton filterButton = new JButton("Filter");
@@ -401,26 +405,37 @@ public class Display implements ActionListener {
     DefaultTableModel aModel = (DefaultTableModel) table.getModel();
     JScrollPane jsp = new JScrollPane(table);
     int colCount;
-    JButton editSQL = new JButton("EDIT");
     private JButton backFromUserListToCRUD = new JButton("Back");
-
+    private JMenu tableMenu = new JMenu("TABLE");
+    private JMenuBar tableChoice = new JMenuBar();
+    private JMenuItem userTable = new JMenuItem("USERS");
+    private JMenuItem usedMaterialTable = new JMenuItem("MATERIAL LIST");
+    private JMenuItem architectTable = new JMenuItem("ARCHITECTS");
+    JTextField userNameFilter = new JTextField();
+    JTextField userFirstNameFilter = new JTextField();
+    JMenuBar userRoleFilter = new JMenuBar();
+    JMenu roleSelect = new JMenu("Role");
+    JMenuItem anyRole = new JMenuItem("Any");
+    JMenuItem defaultRole = new JMenuItem("Default");
+    JMenuItem customerRole = new JMenuItem("Customer");
+    JMenuItem architectRole = new JMenuItem("Architect");
+    RequestFilter requestFilter = new RequestFilter();
     /**
-     * Create the first board without filter, should be called once per code or before using back button
+     * ADMIN USER ONLY
+     * Able the admin to check everything inside the user table
      */
-    private void listUsers() {
+    private void listUsersAdmin() {
+        window.setTitle("CA DESIGN - EDIT LIST [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
         resetWindow();
         //DESIGN
-        window.setTitle("CA DESIGN - USERS [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
-        l1.add(new JLabel("Filter by first name ( => 3 )"));
-        l1.add(new JLabel("Filter by last name ( => 3 )"));
-        l2.add(firstNameFilter);
-        l2.add(lastNameFilter);
-        l2.add(filterButton);
-        c1.add(l1);
-        c1.add(l2);
+        tableMenu.add(userTable);
+        tableMenu.add(architectTable);
+        tableMenu.add(usedMaterialTable);
+        tableChoice.add(tableMenu);
+        l1.add(tableChoice);
 
         //CREATION OF TABLE
-        aModel.setColumnIdentifiers(entetes);
+        aModel.setColumnIdentifiers(headerUsers);
         jsp.setPreferredSize(dimension);
 
         //Remmplissage du tableau
@@ -441,22 +456,45 @@ public class Display implements ActionListener {
             e.printStackTrace();
         }
 
-
-        request = "SELECT user_id, user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users";
         //*****************
-        l3.add(jsp);
-
-        if (userRole.equals("admin")) {
-            l3.add(editSQL);
-        }
-
-        l4.add(backFromUserListToCRUD);
+        l2.add(new JLabel("Name (>3)"));
+        l2.add(new JLabel("First name (>3)"));
+        l3.add(userNameFilter);
+        l3.add(userFirstNameFilter);
+        roleSelect.add(anyRole);
+        roleSelect.add(defaultRole);
+        roleSelect.add(customerRole);
+        roleSelect.add(architectRole);
+        userRoleFilter.add(roleSelect);
+        l3.add(userRoleFilter);
+        l4.add(jsp);
+        l5.add(backFromUserListToCRUD);
+        c1.add(l1);
+        c1.add(l2);
         c1.add(l3);
         c1.add(l4);
         panel.add(c1);
         window.add(panel);
         window.setVisible(true);
-
+        userTable.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("USERS");
+                filterUsers();
+            }
+        });
+        architectTable.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("ARCHITECTS");
+            }
+        });
+        usedMaterialTable.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("MATERIAL LIST");
+            }
+        });
         backFromUserListToCRUD.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -486,24 +524,59 @@ public class Display implements ActionListener {
                 }
             }
         });
+        anyRole.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                request = requestFilter.anyRoleFilter(userNameFilter, userFirstNameFilter);
+                updateBoard();
+            }
+        });
+        defaultRole.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                request = requestFilter.defaultRoleFilter(userNameFilter, userFirstNameFilter);
+                updateBoard();
+            }
+        });
+        customerRole.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                request = requestFilter.customerRoleFilter(userNameFilter, userFirstNameFilter);
+                updateBoard();
+            }
+        });
+        architectRole.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                request = requestFilter.architectRoleFilter(userNameFilter, userFirstNameFilter);
+                updateBoard();
+            }
+        });
     }
 
-    /**
-     * Update the board with new filters. Filters are reseted after because JTextfield keeps the text
-     * to avoid adding multiple WHERE
-     */
-    private void updateBoard() {
-        //
-        EditableTableUsers editableTableUsers = new EditableTableUsers();
+    private void filterUsers() {
+
+        window.setTitle("CA DESIGN - EDIT LIST [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
         if (aModel.getRowCount() > 0) {
             for (int i = aModel.getRowCount() - 1; i > -1; i--) {
                 aModel.removeRow(i);
-
             }
         }
+        l2.removeAll();
+        l2.revalidate();
+        l2.repaint();
         l3.removeAll();
         l3.revalidate();
         l3.repaint();
+        l4.removeAll();
+        l4.revalidate();
+        l4.repaint();
+
+        //CREATION OF TABLE
+        aModel.setColumnIdentifiers(headerUsers);
+        jsp.setPreferredSize(dimension);
+
+        //Remmplissage du tableau
         try {
             Statement statement = connection.createStatement();
             ResultSet results = statement.executeQuery(request);
@@ -520,12 +593,57 @@ public class Display implements ActionListener {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        l3.add(jsp);
-        if (userRole.equals("admin")) {
-            l3.add(editSQL);
-        }
-        request = "SELECT user_firstname, user_name, user_mail, user_role, user_signdatetime FROM users";
+
+        //*****************
+        l2.add(new JLabel("Name (>3)"));
+        l2.add(new JLabel("First name (>3)"));
+        l2.add(new JLabel("Role"));
+        l3.add(userNameFilter);
+        l3.add(userFirstNameFilter);
+        roleSelect.add(anyRole);
+        roleSelect.add(defaultRole);
+        roleSelect.add(customerRole);
+        roleSelect.add(architectRole);
+        userRoleFilter.add(roleSelect);
+        l3.add(userRoleFilter);
+        l4.add(jsp);
+        l5.add(backFromUserListToCRUD);
+        c1.add(l2);
+        c1.add(l3);
+        c1.add(l4);
+        panel.add(c1);
+        window.add(panel);
         window.setVisible(true);
+    }
+    /**
+     * Update the board with new filters. Filters are reseted after because JTextfield keeps the text
+     * to avoid adding multiple WHERE
+     */
+    private void updateBoard() {
+        //
+        EditableTableUsers editableTableUsers = new EditableTableUsers();
+        if (aModel.getRowCount() > 0) {
+            for (int i = aModel.getRowCount() - 1; i > -1; i--) {
+                aModel.removeRow(i);
+
+            }
+        }
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                aModel.addRow(objects);
+            }
+            table.setModel(aModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         //
         aModel.addTableModelListener(new TableModelListener() {
@@ -539,9 +657,15 @@ public class Display implements ActionListener {
 
     /**
      * Reset every content of the window
-     * Must be called before every display
+     * Must be called before every display which needs lot of changes
      */
     private void resetWindow() {
+        //TABLE
+        if (aModel.getRowCount() > 0) {
+            for (int i = aModel.getRowCount() - 1; i > -1; i--) {
+                aModel.removeRow(i);
+            }
+        }
 
         //MENUS AND MENULIST
         accessMenu.removeAll();
