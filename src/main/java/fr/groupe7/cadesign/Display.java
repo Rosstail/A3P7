@@ -15,7 +15,7 @@ import java.sql.*;
  */
 public class Display implements ActionListener {
     private UpdateProfile updateProfile = new UpdateProfile();
-    private EditableTableUsers editableTableUsers = new EditableTableUsers();
+    private EditableTable editableTable = new EditableTable();
 
     private JFrame window = new JFrame();
     private JMenu accessMenu = new JMenu("Se connecter / S'enregistrer");
@@ -396,23 +396,33 @@ public class Display implements ActionListener {
     }
 
     private String[] headerUsers = {"ID", "Name", "First name", "Mail adress", "Password", "Role", "Sign datetime"};
+    private String[] headerArchitects = {"ID", "Referent architect first name", "referent architect name", "Project name", "Architect assignation datetime"};
+    private String[] headerProjects = {"ID", "Project name", "Customer", "Referent Architect", "Project start datetime", "Project delivery datetime", "Project quotation", "Project commentary"};
+    private String[] headerSteps = {"ID", "Project Name", "Referent architect", "Step name", "Step commentary", "Step start datetime", "Step done datetime"};
     private String request = "SELECT user_id, user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users";
     Dimension dimension = new Dimension(700, 400);
     JTable table = new JTable();
     DefaultTableModel userTableModel = (DefaultTableModel) table.getModel();
+    DefaultTableModel projectTableModel = (DefaultTableModel) table.getModel();
     DefaultTableModel architectTableModel = (DefaultTableModel) table.getModel();
-    DefaultTableModel usedMaterialTableModel = (DefaultTableModel) table.getModel();
+    DefaultTableModel stepTableModel = (DefaultTableModel) table.getModel();
     JScrollPane jsp = new JScrollPane(table);
     int colCount;
     private JButton backFromUserListToCRUD = new JButton("Back");
     private JMenu tableMenu = new JMenu("TABLE");
     private JMenuBar tableChoice = new JMenuBar();
     private JMenuItem userTable = new JMenuItem("USERS");
-    private JMenuItem usedMaterialTable = new JMenuItem("MATERIAL LIST");
+    private JMenuItem projectTable = new JMenuItem("PROJECTS");
+    private JMenuItem stepTable = new JMenuItem("STEPS");
+    //private JMenuItem usedMaterialTable = new JMenuItem("MATERIAL LIST");
     private JMenuItem architectTable = new JMenuItem("ARCHITECTS");
     JTextField userNameFilter = new JTextField();
     JTextField userFirstNameFilter = new JTextField();
     JMenuBar userRoleFilter = new JMenuBar();
+    JTextField projectNameFilter = new JTextField();
+    JButton projectFilter = new JButton("Filter");
+    JButton architectProjectFilter = new JButton("Filter");
+    JButton stepFilter = new JButton("Filter");
     JMenu roleSelect = new JMenu("Role");
     JMenuItem anyRole = new JMenuItem("Any");
     JMenuItem defaultRole = new JMenuItem("Default");
@@ -428,8 +438,9 @@ public class Display implements ActionListener {
         resetWindow();
         //DESIGN
         tableMenu.add(userTable);
+        tableMenu.add(projectTable);
         tableMenu.add(architectTable);
-        tableMenu.add(usedMaterialTable);
+        tableMenu.add(stepTable);
         tableChoice.add(tableMenu);
         l1.add(tableChoice);
 
@@ -483,17 +494,32 @@ public class Display implements ActionListener {
                 filterUsers();
             }
         });
+        projectTable.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("PROJECTS");
+                request = "SELECT P.project_id, P.project_name, P.project_customer_id, P.project_architect_id, P.project_start_datetime, P.project_delivery_datetime, P.project_quotation, project_commentary FROM projects AS P";
+                filterProjects();
+            }
+        });
         architectTable.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("ARCHITECTS");
-                //request = "SELECT"
+                request = "SELECT A.architect_id, U.user_firstname, user_name, P.project_name, A.architect_assigned_datetime FROM architects AS A, users AS U, projects AS P WHERE U.user_id = A.architect_id AND P.project_id = A.architect_project_id";
+                System.out.println(request);
+                filterArchitects();
             }
         });
-        usedMaterialTable.addActionListener(new ActionListener() {
+        stepTable.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("MATERIAL LIST");
+                System.out.println("STEPS");
+                request = "SELECT S.step_id, P.project_name, S.step_architect_id, S.step_name, S.step_commentary, S.step_start_datetime, S.step_done_datetime" +
+                        " FROM users AS U, projects AS P, steps as S" +
+                        " WHERE U.user_id = S.step_architect_id AND P.project_id = S.step_project_id";
+                filterSteps();
+
             }
         });
         backFromUserListToCRUD.addActionListener(new ActionListener() {
@@ -530,11 +556,33 @@ public class Display implements ActionListener {
                 updateUserBoard();
             }
         });
+        projectFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                request = requestFilter.projectFilter(userNameFilter, userFirstNameFilter, projectNameFilter);
+                updateProjectBoard();
+            }
+        });
+        stepFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                request = requestFilter.stepProjectFilter(userNameFilter, userFirstNameFilter, projectNameFilter);
+                updateStepsBoard();
+            }
+        });
+        architectProjectFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                request = requestFilter.architectProjectFilter(userNameFilter, userFirstNameFilter, projectNameFilter);
+                updateArchitectBoard();
+            }
+        });
     }
 
     private void filterUsers() {
 
         window.setTitle("CA DESIGN - EDIT LIST [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
+        userTableModel.setColumnIdentifiers(headerUsers);
         if (userTableModel.getRowCount() > 0) {
             for (int i = userTableModel.getRowCount() - 1; i > -1; i--) {
                 userTableModel.removeRow(i);
@@ -596,13 +644,14 @@ public class Display implements ActionListener {
         window.add(panel);
         window.setVisible(true);
     }
+
     /**
      * Update the board with new filters. Filters are reseted after because JTextfield keeps the text
      * to avoid adding multiple WHERE
      */
     private void updateUserBoard() {
         //
-        EditableTableUsers editableTableUsers = new EditableTableUsers();
+        EditableTable editableTable = new EditableTable();
         if (userTableModel.getRowCount() > 0) {
             for (int i = userTableModel.getRowCount() - 1; i > -1; i--) {
                 userTableModel.removeRow(i);
@@ -627,6 +676,279 @@ public class Display implements ActionListener {
         }
     }
 
+    private void filterProjects() {
+
+        window.setTitle("CA DESIGN - EDIT PROJECTS [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
+        userTableModel.setColumnIdentifiers(headerProjects);
+        if (userTableModel.getRowCount() > 0) {
+            for (int i = userTableModel.getRowCount() - 1; i > -1; i--) {
+                projectTableModel.removeRow(i);
+            }
+        }
+        l2.removeAll();
+        l2.revalidate();
+        l2.repaint();
+        l3.removeAll();
+        l3.revalidate();
+        l3.repaint();
+        l4.removeAll();
+        l4.revalidate();
+        l4.repaint();
+
+        //CREATION OF TABLE
+        /**
+         * L'ERREUR DE RETABLE SE SITUE ICI
+         */
+        projectTableModel.setColumnIdentifiers(headerProjects);
+        jsp.setPreferredSize(dimension);
+
+        //Remmplissage du tableau
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                projectTableModel.addRow(objects);
+            }
+            table.setModel(projectTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //*****************
+        l2.add(new JLabel("Name (>3)"));
+        l2.add(new JLabel("First name (>3)"));
+        l2.add(new JLabel("Project name (>3)"));
+        l3.add(userNameFilter);
+        l3.add(userFirstNameFilter);
+        l3.add(projectNameFilter);
+        l3.add(projectFilter);
+        l4.add(jsp);
+        l5.add(backFromUserListToCRUD);
+        c1.add(l2);
+        c1.add(l3);
+        c1.add(l4);
+        panel.add(c1);
+        window.add(panel);
+        window.setVisible(true);
+    }
+
+    /**
+     * Update the board with new filters. Filters are reseted after because JTextfield keeps the text
+     * to avoid adding multiple WHERE
+     */
+    private void updateProjectBoard() {
+        //
+        EditableTable editableTable = new EditableTable();
+        if (userTableModel.getRowCount() > 0) {
+            for (int i = userTableModel.getRowCount() - 1; i > -1; i--) {
+                userTableModel.removeRow(i);
+
+            }
+        }
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                userTableModel.addRow(objects);
+            }
+            table.setModel(userTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void filterSteps() {
+
+        window.setTitle("CA DESIGN - EDIT STEPS [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
+        stepTableModel.setColumnIdentifiers(headerSteps);
+        if (stepTableModel.getRowCount() > 0) {
+            for (int i = stepTableModel.getRowCount() - 1; i > -1; i--) {
+                stepTableModel.removeRow(i);
+            }
+        }
+        l2.removeAll();
+        l2.revalidate();
+        l2.repaint();
+        l3.removeAll();
+        l3.revalidate();
+        l3.repaint();
+        l4.removeAll();
+        l4.revalidate();
+        l4.repaint();
+
+        //CREATION OF TABLE
+        /**
+         * L'ERREUR DE RETABLE SE SITUE ICI
+         */
+        jsp.setPreferredSize(dimension);
+
+        //Remmplissage du tableau
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                stepTableModel.addRow(objects);
+            }
+            table.setModel(stepTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //*****************
+        l2.add(new JLabel("Name (>3)"));
+        l2.add(new JLabel("First name (>3)"));
+        l2.add(new JLabel("Project name (>3)"));
+        l3.add(userNameFilter);
+        l3.add(userFirstNameFilter);
+        l3.add(projectNameFilter);
+        l3.add(stepFilter);
+        l4.add(jsp);
+        l5.add(backFromUserListToCRUD);
+        c1.add(l2);
+        c1.add(l3);
+        c1.add(l4);
+        panel.add(c1);
+        window.add(panel);
+        window.setVisible(true);
+    }
+
+    /**
+     * Update the board with new filters. Filters are reseted after because JTextfield keeps the text
+     * to avoid adding multiple WHERE
+     */
+    private void updateStepsBoard() {
+        //
+        EditableTable editableTable = new EditableTable();
+        if (stepTableModel.getRowCount() > 0) {
+            for (int i = stepTableModel.getRowCount() - 1; i > -1; i--) {
+                stepTableModel.removeRow(i);
+
+            }
+        }
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                stepTableModel.addRow(objects);
+            }
+            table.setModel(stepTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void filterArchitects() {
+
+        window.setTitle("CA DESIGN - ARCHITECTS EDIT LIST [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
+        if (architectTableModel.getRowCount() > 0) {
+            for (int i = architectTableModel.getRowCount() - 1; i > -1; i--) {
+                architectTableModel.removeRow(i);
+            }
+        }
+        l2.removeAll();
+        l2.revalidate();
+        l2.repaint();
+        l3.removeAll();
+        l3.revalidate();
+        l3.repaint();
+        l4.removeAll();
+        l4.revalidate();
+        l4.repaint();
+
+        //CREATION OF TABLE
+        userTableModel.setColumnIdentifiers(headerArchitects);
+        jsp.setPreferredSize(dimension);
+
+        //Remmplissage du tableau
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                architectTableModel.addRow(objects);
+            }
+            table.setModel(architectTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //*****************
+        l2.add(new JLabel("Name (>3)"));
+        l2.add(new JLabel("First name (>3)"));
+        l2.add(new JLabel("Project Name (>3)"));
+        l3.add(userNameFilter);
+        l3.add(userFirstNameFilter);
+        l3.add(projectNameFilter);
+        l3.add(architectProjectFilter);
+        l4.add(jsp);
+        l5.add(backFromUserListToCRUD);
+        c1.add(l2);
+        c1.add(l3);
+        c1.add(l4);
+        panel.add(c1);
+        window.add(panel);
+        window.setVisible(true);
+    }
+
+    /**
+     * Update the Architect list after filter
+     */
+    private void updateArchitectBoard() {
+        //
+        EditableTable editableTable = new EditableTable();
+        if (architectTableModel.getRowCount() > 0) {
+            for (int i = architectTableModel.getRowCount() - 1; i > -1; i--) {
+                architectTableModel.removeRow(i);
+
+            }
+        }
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                architectTableModel.addRow(objects);
+            }
+            table.setModel(architectTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Reset every content of the window
      * Must be called before every display which needs lot of changes
@@ -636,6 +958,11 @@ public class Display implements ActionListener {
         if (userTableModel.getRowCount() > 0) {
             for (int i = userTableModel.getRowCount() - 1; i > -1; i--) {
                 userTableModel.removeRow(i);
+            }
+        }
+        if (architectTableModel.getRowCount() > 0) {
+            for (int i = architectTableModel.getRowCount() - 1; i > -1; i--) {
+                architectTableModel.removeRow(i);
             }
         }
 
