@@ -397,12 +397,11 @@ public class Display implements ActionListener {
 
     private String[] headerUsers = {"ID", "Name", "First name", "Mail adress", "Password", "Role", "Sign datetime"};
     private String request = "SELECT user_id, user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users";
-    private JTextField firstNameFilter = new JTextField();
-    private JTextField lastNameFilter = new JTextField();
-    private JButton filterButton = new JButton("Filter");
     Dimension dimension = new Dimension(700, 400);
     JTable table = new JTable();
-    DefaultTableModel aModel = (DefaultTableModel) table.getModel();
+    DefaultTableModel userTableModel = (DefaultTableModel) table.getModel();
+    DefaultTableModel architectTableModel = (DefaultTableModel) table.getModel();
+    DefaultTableModel usedMaterialTableModel = (DefaultTableModel) table.getModel();
     JScrollPane jsp = new JScrollPane(table);
     int colCount;
     private JButton backFromUserListToCRUD = new JButton("Back");
@@ -435,7 +434,7 @@ public class Display implements ActionListener {
         l1.add(tableChoice);
 
         //CREATION OF TABLE
-        aModel.setColumnIdentifiers(headerUsers);
+        userTableModel.setColumnIdentifiers(headerUsers);
         jsp.setPreferredSize(dimension);
 
         //Remmplissage du tableau
@@ -449,9 +448,9 @@ public class Display implements ActionListener {
                 for(int i = 0; i < colCount; i++) {
                     objects[i] = results.getObject(i+1);
                 }
-                aModel.addRow(objects);
+                userTableModel.addRow(objects);
             }
-            table.setModel(aModel);
+            table.setModel(userTableModel);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -480,6 +479,7 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("USERS");
+                request = "SELECT user_id, user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users";
                 filterUsers();
             }
         });
@@ -487,6 +487,7 @@ public class Display implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("ARCHITECTS");
+                //request = "SELECT"
             }
         });
         usedMaterialTable.addActionListener(new ActionListener() {
@@ -501,55 +502,32 @@ public class Display implements ActionListener {
                 displayMainCrudMenu();
             }
         });
-        filterButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                if (firstNameFilter.getText().length() >= 3 && lastNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "%' AND user_name LIKE '" +
-                            lastNameFilter.getText() + "%'";
-                    updateBoard();
-                }
-                else if (firstNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_firstname LIKE '" + firstNameFilter.getText() + "%'";
-                    updateBoard();
-                }
-                else if(lastNameFilter.getText().length() >= 3) {
-                    request = request + " WHERE user_name LIKE '" + lastNameFilter.getText() + "%'";
-                    updateBoard();
-                }
-                else {
-                    System.out.println("Filtres trop courts !");
-                    request = "SELECT user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users";
-                    updateBoard();
-                }
-            }
-        });
         anyRole.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 request = requestFilter.anyRoleFilter(userNameFilter, userFirstNameFilter);
-                updateBoard();
+                updateUserBoard();
             }
         });
         defaultRole.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 request = requestFilter.defaultRoleFilter(userNameFilter, userFirstNameFilter);
-                updateBoard();
+                updateUserBoard();
             }
         });
         customerRole.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 request = requestFilter.customerRoleFilter(userNameFilter, userFirstNameFilter);
-                updateBoard();
+                updateUserBoard();
             }
         });
         architectRole.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 request = requestFilter.architectRoleFilter(userNameFilter, userFirstNameFilter);
-                updateBoard();
+                updateUserBoard();
             }
         });
     }
@@ -557,9 +535,9 @@ public class Display implements ActionListener {
     private void filterUsers() {
 
         window.setTitle("CA DESIGN - EDIT LIST [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
-        if (aModel.getRowCount() > 0) {
-            for (int i = aModel.getRowCount() - 1; i > -1; i--) {
-                aModel.removeRow(i);
+        if (userTableModel.getRowCount() > 0) {
+            for (int i = userTableModel.getRowCount() - 1; i > -1; i--) {
+                userTableModel.removeRow(i);
             }
         }
         l2.removeAll();
@@ -573,7 +551,10 @@ public class Display implements ActionListener {
         l4.repaint();
 
         //CREATION OF TABLE
-        aModel.setColumnIdentifiers(headerUsers);
+        /**
+         * L'ERREUR DE RETABLE SE SITUE ICI
+         */
+        userTableModel.setColumnIdentifiers(headerUsers);
         jsp.setPreferredSize(dimension);
 
         //Remmplissage du tableau
@@ -587,9 +568,9 @@ public class Display implements ActionListener {
                 for(int i = 0; i < colCount; i++) {
                     objects[i] = results.getObject(i+1);
                 }
-                aModel.addRow(objects);
+                userTableModel.addRow(objects);
             }
-            table.setModel(aModel);
+            table.setModel(userTableModel);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -619,12 +600,12 @@ public class Display implements ActionListener {
      * Update the board with new filters. Filters are reseted after because JTextfield keeps the text
      * to avoid adding multiple WHERE
      */
-    private void updateBoard() {
+    private void updateUserBoard() {
         //
         EditableTableUsers editableTableUsers = new EditableTableUsers();
-        if (aModel.getRowCount() > 0) {
-            for (int i = aModel.getRowCount() - 1; i > -1; i--) {
-                aModel.removeRow(i);
+        if (userTableModel.getRowCount() > 0) {
+            for (int i = userTableModel.getRowCount() - 1; i > -1; i--) {
+                userTableModel.removeRow(i);
 
             }
         }
@@ -638,21 +619,12 @@ public class Display implements ActionListener {
                 for(int i = 0; i < colCount; i++) {
                     objects[i] = results.getObject(i+1);
                 }
-                aModel.addRow(objects);
+                userTableModel.addRow(objects);
             }
-            table.setModel(aModel);
+            table.setModel(userTableModel);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        //
-        aModel.addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                editableTableUsers.editUsers(e, table, connection);
-            }
-        });
-        //
     }
 
     /**
@@ -661,9 +633,9 @@ public class Display implements ActionListener {
      */
     private void resetWindow() {
         //TABLE
-        if (aModel.getRowCount() > 0) {
-            for (int i = aModel.getRowCount() - 1; i > -1; i--) {
-                aModel.removeRow(i);
+        if (userTableModel.getRowCount() > 0) {
+            for (int i = userTableModel.getRowCount() - 1; i > -1; i--) {
+                userTableModel.removeRow(i);
             }
         }
 
