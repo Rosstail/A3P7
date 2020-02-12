@@ -399,6 +399,8 @@ public class Display implements ActionListener {
     private String[] headerArchitects = {"ID", "Referent architect first name", "referent architect name", "Project name", "Architect assignation datetime"};
     private String[] headerProjects = {"ID", "Project name", "Customer", "Referent Architect", "Project start datetime", "Project delivery datetime", "Project quotation", "Project commentary"};
     private String[] headerSteps = {"ID", "Project Name", "Referent architect", "Step name", "Step commentary", "Step start datetime", "Step done datetime"};
+    private String[] headerMaterialsList = {"ID", "Material Name", "Price per m2"};
+    private String[] headerProjectMaterials = {"Project name", "Customer Name", "Customer firstname", "Material id", "Material name", "Material project ID"};
     private String request = "SELECT user_id, user_name, user_firstname, user_mail, user_password, user_role, user_signdatetime FROM users";
     Dimension dimension = new Dimension(700, 400);
     JTable table = new JTable();
@@ -406,6 +408,8 @@ public class Display implements ActionListener {
     DefaultTableModel projectTableModel = (DefaultTableModel) table.getModel();
     DefaultTableModel architectTableModel = (DefaultTableModel) table.getModel();
     DefaultTableModel stepTableModel = (DefaultTableModel) table.getModel();
+    DefaultTableModel materialListTableModel = (DefaultTableModel) table.getModel();
+    DefaultTableModel projectMaterialTableModel = (DefaultTableModel) table.getModel();
     JScrollPane jsp = new JScrollPane(table);
     int colCount;
     private JButton backFromUserListToCRUD = new JButton("Back");
@@ -414,13 +418,17 @@ public class Display implements ActionListener {
     private JMenuItem userTable = new JMenuItem("USERS");
     private JMenuItem projectTable = new JMenuItem("PROJECTS");
     private JMenuItem stepTable = new JMenuItem("STEPS");
-    //private JMenuItem usedMaterialTable = new JMenuItem("MATERIAL LIST");
+    private JMenuItem materialListTable = new JMenuItem("MATERIAL LIST");
+    private JMenuItem projectMaterialListTable = new JMenuItem("PROJECT MATERIAL");
     private JMenuItem architectTable = new JMenuItem("ARCHITECTS");
     JTextField userNameFilter = new JTextField();
     JTextField userFirstNameFilter = new JTextField();
+    JTextField materialNameFilter = new JTextField();
     JMenuBar userRoleFilter = new JMenuBar();
     JTextField projectNameFilter = new JTextField();
     JButton projectFilter = new JButton("Filter");
+    JButton materialFilter = new JButton("Filter");
+    JButton projectMaterialFilter = new JButton("Filter");
     JButton architectProjectFilter = new JButton("Filter");
     JButton stepFilter = new JButton("Filter");
     JMenu roleSelect = new JMenu("Role");
@@ -441,6 +449,8 @@ public class Display implements ActionListener {
         tableMenu.add(projectTable);
         tableMenu.add(architectTable);
         tableMenu.add(stepTable);
+        tableMenu.add(materialListTable);
+        tableMenu.add(projectMaterialListTable);
         tableChoice.add(tableMenu);
         l1.add(tableChoice);
 
@@ -522,6 +532,26 @@ public class Display implements ActionListener {
 
             }
         });
+        materialListTable.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("MATERIALS LIST");
+                request = "SELECT ML.id, ML.name, ML.price_surface FROM materials_list AS ML";
+                System.out.println(request);
+                filterMaterialsList();
+            }
+        });
+        projectMaterialListTable.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("PROJECT MATERIALS");
+                request = "SELECT P.project_name, U.user_name, U.user_firstname, PM.material_id, ML.name, PM.material_project_id, PM.material_needed_surface " +
+                        "FROM materials_list AS ML, users AS U, projects AS P, projects_materials AS PM " +
+                        "WHERE P.project_id = PM.material_project_id AND U.user_id = P.project_customer_id AND ML.id = PM.material_material_id";
+                System.out.println(request);
+                filterProjectsMaterials();
+            }
+        });
         backFromUserListToCRUD.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -575,6 +605,20 @@ public class Display implements ActionListener {
             public void actionPerformed(ActionEvent e) {
                 request = requestFilter.architectProjectFilter(userNameFilter, userFirstNameFilter, projectNameFilter);
                 updateArchitectBoard();
+            }
+        });
+        materialFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                request = requestFilter.materialListFilter(materialNameFilter);
+                updateMaterialListBoard();
+            }
+        });
+        projectMaterialFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                request = requestFilter.projectMaterialFilter(projectNameFilter, materialNameFilter, userNameFilter, userFirstNameFilter);
+                updateProjectMaterialBoard();
             }
         });
     }
@@ -880,7 +924,7 @@ public class Display implements ActionListener {
         l4.repaint();
 
         //CREATION OF TABLE
-        userTableModel.setColumnIdentifiers(headerArchitects);
+        architectTableModel.setColumnIdentifiers(headerArchitects);
         jsp.setPreferredSize(dimension);
 
         //Remmplissage du tableau
@@ -944,6 +988,184 @@ public class Display implements ActionListener {
                 architectTableModel.addRow(objects);
             }
             table.setModel(architectTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void filterMaterialsList() {
+
+        window.setTitle("CA DESIGN - ARCHITECTS EDIT LIST [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
+        if (architectTableModel.getRowCount() > 0) {
+            for (int i = architectTableModel.getRowCount() - 1; i > -1; i--) {
+                architectTableModel.removeRow(i);
+            }
+        }
+        l2.removeAll();
+        l2.revalidate();
+        l2.repaint();
+        l3.removeAll();
+        l3.revalidate();
+        l3.repaint();
+        l4.removeAll();
+        l4.revalidate();
+        l4.repaint();
+
+        //CREATION OF TABLE
+        materialListTableModel.setColumnIdentifiers(headerMaterialsList);
+        jsp.setPreferredSize(dimension);
+
+        //Remmplissage du tableau
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                materialListTableModel.addRow(objects);
+            }
+            table.setModel(architectTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //*****************
+        l2.add(new JLabel("Material name (>3)"));
+        l3.add(materialNameFilter);
+        l3.add(materialFilter);
+        l4.add(jsp);
+        l5.add(backFromUserListToCRUD);
+        c1.add(l2);
+        c1.add(l3);
+        c1.add(l4);
+        panel.add(c1);
+        window.add(panel);
+        window.setVisible(true);
+    }
+
+    /**
+     * Update the Architect list after filter
+     */
+    private void updateMaterialListBoard() {
+        //
+        EditableTable editableTable = new EditableTable();
+        if (materialListTableModel.getRowCount() > 0) {
+            for (int i = materialListTableModel.getRowCount() - 1; i > -1; i--) {
+                materialListTableModel.removeRow(i);
+
+            }
+        }
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                materialListTableModel.addRow(objects);
+            }
+            table.setModel(materialListTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void filterProjectsMaterials() {
+
+        window.setTitle("CA DESIGN - EDIT PROJECTS MATERIALS [" + userRole.toUpperCase() + "] " + userFirstName + " " + userLastName);
+        stepTableModel.setColumnIdentifiers(headerProjectMaterials);
+        if (stepTableModel.getRowCount() > 0) {
+            for (int i = stepTableModel.getRowCount() - 1; i > -1; i--) {
+                stepTableModel.removeRow(i);
+            }
+        }
+        l2.removeAll();
+        l2.revalidate();
+        l2.repaint();
+        l3.removeAll();
+        l3.revalidate();
+        l3.repaint();
+        l4.removeAll();
+        l4.revalidate();
+        l4.repaint();
+
+        //CREATION OF TABLE
+        /**
+         * L'ERREUR DE RETABLE SE SITUE ICI
+         */
+        jsp.setPreferredSize(dimension);
+
+        //Remmplissage du tableau
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                projectMaterialTableModel.addRow(objects);
+            }
+            table.setModel(projectMaterialTableModel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //*****************
+        l2.add(new JLabel("Project name (>3)"));
+        l2.add(new JLabel("Material Name (>3)"));
+        l2.add(new JLabel("Customer Name (>3)"));
+        l2.add(new JLabel("Customer First name (>3)"));
+        l3.add(projectNameFilter);
+        l3.add(materialNameFilter);
+        l3.add(userNameFilter);
+        l3.add(userFirstNameFilter);
+        l3.add(projectMaterialFilter);
+        l4.add(jsp);
+        l5.add(backFromUserListToCRUD);
+        c1.add(l2);
+        c1.add(l3);
+        c1.add(l4);
+        panel.add(c1);
+        window.add(panel);
+        window.setVisible(true);
+    }
+
+    /**
+     * Update the board with new filters. Filters are reseted after because JTextfield keeps the text
+     * to avoid adding multiple WHERE
+     */
+    private void updateProjectMaterialBoard() {
+        //
+        EditableTable editableTable = new EditableTable();
+        if (stepTableModel.getRowCount() > 0) {
+            for (int i = stepTableModel.getRowCount() - 1; i > -1; i--) {
+                stepTableModel.removeRow(i);
+
+            }
+        }
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet results = statement.executeQuery(request);
+            ResultSetMetaData meta = results.getMetaData();
+            colCount = meta.getColumnCount();
+            while (results.next()) {
+                Object[] objects = new Object[colCount];
+                for(int i = 0; i < colCount; i++) {
+                    objects[i] = results.getObject(i+1);
+                }
+                stepTableModel.addRow(objects);
+            }
+            table.setModel(stepTableModel);
         } catch (SQLException e) {
             e.printStackTrace();
         }

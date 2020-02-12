@@ -122,4 +122,30 @@ public class RequestFilter {
 
         return request;
     }
+
+    public String materialListFilter(JTextField materialName) {
+        String request = "SELECT ML.id, ML.name, ML.price_surface FROM materials_list AS ML";
+        if (materialName.getText().length() >= 3)
+            request = request + " WHERE ML.name LIKE '" + materialName.getText() + "%'";
+        System.out.println(request);
+
+        return request;
+    }
+
+    public String projectMaterialFilter(JTextField projectName, JTextField materialName, JTextField userName, JTextField userFirstName) {
+        String request = "SELECT P.project_name, U.user_name, U.user_firstname, PM.material_id, ML.name, PM.material_project_id, PM.material_needed_surface " +
+                "FROM materials_list AS ML, users AS U, projects AS P, projects_materials AS PM " +
+                "WHERE P.project_id = PM.material_project_id AND U.user_id = P.project_customer_id AND ML.id = PM.material_material_id";
+        if (projectName.getText().length() >= 3)
+            request = request + " AND P.project_name LIKE '" + projectName.getText() + "%'";
+        if (materialName.getText().length() >= 3)
+            request = request + " AND ML.name LIKE '" + materialName.getText() + "%'";
+        if (userName.getText().length() >= 3)
+            request = request + " AND U.user_name LIKE '" + userName.getText() + "%'";
+        if (userFirstName.getText().length() >= 3)
+            request = request + " AND U.user_firstname LIKE '" + userFirstName.getText() + "%'";
+        System.out.println(request);
+
+        return request;
+    }
 }
